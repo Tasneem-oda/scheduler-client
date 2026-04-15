@@ -122,7 +122,9 @@ let sched = [];
 let posts = [];
 let postCnt = 0;
 
-// ── Init ──
+// قواميس اختيارية لتحسين المظهر (اختياري)
+const PLAT_LABELS = { facebook:'📘 فيسبوك', instagram:'📸 إنستغرام', twitter:'🐦 تويتر' };
+
 async function init() {
   if (!clientId) { show('notfound'); return; }
   try {
@@ -145,7 +147,7 @@ function renderMain() {
   updateStats();
   const tom = new Date(); tom.setDate(tom.getDate()+1);
   document.getElementById('startDate').value = tom.toISOString().split('T')[0];
-  addPost();
+  addPost(); // إضافة أول منشور تلقائياً
   renderSched();
 }
 
@@ -155,51 +157,84 @@ function updateStats() {
   document.getElementById('statPublished').textContent = sched.filter(p=>p.status==='publishd').length;
 }
 
-// ── Posts Logic ──
+// ── الإضافة الذكية للمنشورات ──
 function addPost() {
   const platforms = client?.custom_config?.platforms || ['facebook'];
   const prompts = client?.custom_config?.prompts || {};
-  const cats = Object.keys(prompts);
-  posts.push({ id:++postCnt, text:'', platform:platforms[0], category:cats[0] });
+  const cats = Object.keys(prompts); // استخراج "رقم المنشور" من الكوفيج (first, second, third...)
+
+  posts.push({ 
+    id: ++postCnt, 
+    text: '', 
+    platform: platforms[0], 
+    category: cats[0] || 'default' 
+  });
   renderPosts();
+}
+
+function removePost(idx) {
+    if(posts.length > 1) {
+        posts.splice(idx, 1);
+        renderPosts();
+    }
 }
 
 function renderPosts() {
   const platforms = client?.custom_config?.platforms || ['facebook'];
   const cats = Object.keys(client?.custom_config?.prompts || {});
   
-  document.getElementById('postsList').innerHTML = posts.map((p,i)=>`
+  document.getElementById('postsList').innerHTML = posts.map((p, i) => `
     <div class="post-item">
-      <div class="post-hdr"><div class="post-num">${i+1}</div></div>
-      <textarea oninput="posts[${i}].text=this.value" placeholder="اكتب نص المنشور...">${p.text}</textarea>
-      <div class="row3" style="margin-top:10px">
-        ${platforms.length > 1 ? `<div><label>المنصة</label><select onchange="posts[${i}].platform=this.value">${platforms.map(pl=>`<option value="${pl}">${pl}</option>`).join('')}</select></div>`:''}
-        ${cats.length > 1 ? `<div><label>النوع</label><select onchange="posts[${i}].category=this.value">${cats.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div>`:''}
+      <div class="post-hdr">
+        <div class="post-num">${i + 1}</div>
+        <button class="btn-del" onclick="removePost(${i})" style="color:var(--d); background:none; border:none; cursor:pointer;">
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+        </button>
+      </div>
+      
+      <label>نص المنشور</label>
+      <textarea oninput="posts[${i}].text=this.value" placeholder="اكتب نص المنشور هنا...">${p.text}</textarea>
+      
+      <div class="row2" style="margin-top:10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div>
+          <label>المنصة</label>
+          <select onchange="posts[${i}].platform=this.value">
+            ${platforms.map(pl => `<option value="${pl}" ${p.platform === pl ? 'selected' : ''}>${PLAT_LABELS[pl] || pl}</option>`).join('')}
+          </select>
+        </div>
+        
+        <div>
+          <label>رقم المنشور (النوع)</label>
+          <select onchange="posts[${i}].category=this.value">
+            ${cats.map(c => `<option value="${c}" ${p.category === c ? 'selected' : ''}>${c}</option>`).join('')}
+          </select>
+        </div>
       </div>
     </div>
   `).join('');
 }
 
-// ── Scheduled List ──
+// ── عرض المنشورات المجدولة ──
 function renderSched() {
   const el = document.getElementById('schedList');
-  if (!sched.length) { el.innerHTML = '<p class="text-center">لا يوجد منشورات.</p>'; return; }
-  el.innerHTML = sched.map(p=>`
-    <div class="sched-item">
+  if (!sched.length) { el.innerHTML = '<p class="text-center text-muted">لا يوجد منشورات مجدولة حالياً.</p>'; return; }
+  el.innerHTML = sched.map(p => `
+    <div class="sched-item" style="border-bottom: 1px solid var(--g200); padding: 10px 0;">
       <div style="flex:1">
-        <span class="badge ${p.status==='publishd'?'b-published':'b-pending'}">${p.status==='publishd'?'تم النشر':'مجدول'}</span>
-        <span style="font-size:11px; color:var(--g400)">${p.posting_time ? new Date(p.posting_time).toLocaleString('ar-EG') : '—'}</span>
-        <p style="font-size:13px; margin-top:5px">${p.post_text.slice(0,100)}...</p>
+        <span class="badge ${p.status === 'publishd' ? 'b-published' : 'b-pending'}" style="font-size:10px;">${p.status === 'publishd' ? 'تم النشر' : 'مجدول'}</span>
+        <span style="font-size:11px; color:var(--g400); margin-right:8px;">${p.posting_time ? new Date(p.posting_time).toLocaleString('ar-EG') : '—'}</span>
+        <span class="badge" style="background:var(--pl); color:var(--p); font-size:10px; margin-right:5px;">${p.number_of_the_psot || '—'}</span>
+        <p style="font-size:12px; margin-top:5px; color:var(--g600);">${(p.post_text || '').slice(0, 80)}...</p>
       </div>
     </div>
   `).join('');
 }
 
 function switchTab(name, btn) {
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
   btn.classList.add('on');
-  document.getElementById('tab-add').style.display = name==='add'?'block':'none';
-  document.getElementById('tab-sched').style.display = name==='sched'?'block':'none';
+  document.getElementById('tab-add').style.display = name === 'add' ? 'block' : 'none';
+  document.getElementById('tab-sched').style.display = name === 'sched' ? 'block' : 'none';
 }
 
 async function submitPosts() {
@@ -207,23 +242,49 @@ async function submitPosts() {
   const t = document.getElementById('postTime').value;
   const f = parseInt(document.getElementById('freq').value);
   
-  const payload = posts.map((p,i)=>{
+  if(!d || !t) { toast('⚠️ حدد وقت وتاريخ البداية'); return; }
+
+  const payload = posts.map((p, i) => {
     const dt = new Date(`${d}T${t}:00`);
-    dt.setDate(dt.getDate() + i*f);
-    return { client_id:clientId, post_text:p.text, platform:p.platform, category:p.category, posting_time:dt.toISOString() };
+    dt.setDate(dt.getDate() + i * f);
+    return { 
+      client_id: clientId, 
+      post_text: p.text, 
+      platform: p.platform, 
+      category: p.category, // هذا سيرسل القيمة المختارة من الدروب داون (first, second, etc)
+      posting_time: dt.toISOString() 
+    };
   });
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ جاري الحفظ...';
 
   try {
     const res = await fetch(`${N8N}/webhook/submit-posts`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ posts:payload })
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ posts: payload })
     });
-    if(res.ok) { toast('✅ تم الحفظ بنجاح'); location.reload(); }
-  } catch(e) { toast('❌ خطأ في الإرسال'); }
+    if(res.ok) { 
+        toast('✅ تم حفظ وجدولة المنشورات'); 
+        location.reload(); 
+    } else {
+        throw new Error();
+    }
+  } catch(e) { 
+    toast('❌ خطأ في الاتصال بالخادم'); 
+    btn.disabled = false;
+    btn.textContent = 'إرسال جميع المنشورات للجدولة';
+  }
 }
 
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3000)}
+function toast(m){
+    const t=document.getElementById('toast');
+    t.textContent=m; t.classList.add('on');
+    setTimeout(()=>t.classList.remove('on'),3000);
+}
+
 init();
 </script>
 </body>
