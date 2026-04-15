@@ -157,11 +157,14 @@ function updateStats() {
   document.getElementById('statPublished').textContent = sched.filter(p=>p.status==='publishd').length;
 }
 
-// ── الإضافة الذكية للمنشورات ──
+
+// ── تعديل دالة إضافة منشور جديد ──
 function addPost() {
   const platforms = client?.custom_config?.platforms || ['facebook'];
-  const prompts = client?.custom_config?.prompts || {};
-  const cats = Object.keys(prompts); // استخراج "رقم المنشور" من الكوفيج (first, second, third...)
+  
+  // التعديل هنا: استخدام user_prompt بدلاً من prompts
+  const prompts = client?.custom_config?.user_prompt || {};
+  const cats = Object.keys(prompts); 
 
   posts.push({ 
     id: ++postCnt, 
@@ -172,40 +175,35 @@ function addPost() {
   renderPosts();
 }
 
-function removePost(idx) {
-    if(posts.length > 1) {
-        posts.splice(idx, 1);
-        renderPosts();
-    }
-}
-
+// ── تعديل دالة عرض المنشورات (الدروب داون) ──
 function renderPosts() {
   const platforms = client?.custom_config?.platforms || ['facebook'];
-  const cats = Object.keys(client?.custom_config?.prompts || {});
+  
+  // التعديل هنا أيضاً: استخدام user_prompt لضمان ظهور العناصر
+  const prompts = client?.custom_config?.user_prompt || {};
+  const cats = Object.keys(prompts);
   
   document.getElementById('postsList').innerHTML = posts.map((p, i) => `
-    <div class="post-item">
-      <div class="post-hdr">
-        <div class="post-num">${i + 1}</div>
-        <button class="btn-del" onclick="removePost(${i})" style="color:var(--d); background:none; border:none; cursor:pointer;">
-             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-        </button>
+    <div class="post-item" style="background:#fff; border:1px solid var(--g200); padding:15px; border-radius:12px; margin-bottom:15px;">
+      <div class="post-hdr" style="display:flex; justify-content:space-between; margin-bottom:10px;">
+        <div class="post-num" style="background:var(--p); color:#fff; width:25px; height:25px; border-radius:50%; text-align:center; font-size:12px; line-height:25px;">${i + 1}</div>
+        <button onclick="removePost(${i})" style="color:var(--d); background:none; border:none; cursor:pointer;">🗑️</button>
       </div>
       
-      <label>نص المنشور</label>
-      <textarea oninput="posts[${i}].text=this.value" placeholder="اكتب نص المنشور هنا...">${p.text}</textarea>
+      <label style="font-weight:600; display:block; margin-bottom:5px;">نص المنشور</label>
+      <textarea oninput="posts[${i}].text=this.value" style="width:100%; border:1.5px solid var(--g200); border-radius:8px; padding:10px; min-height:100px;">${p.text}</textarea>
       
-      <div class="row2" style="margin-top:10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+      <div class="row2" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
         <div>
-          <label>المنصة</label>
-          <select onchange="posts[${i}].platform=this.value">
-            ${platforms.map(pl => `<option value="${pl}" ${p.platform === pl ? 'selected' : ''}>${PLAT_LABELS[pl] || pl}</option>`).join('')}
+          <label style="font-size:12px;">المنصة</label>
+          <select onchange="posts[${i}].platform=this.value" style="width:100%; padding:8px; border-radius:8px; border:1.5px solid var(--g200);">
+            ${platforms.map(pl => `<option value="${pl}" ${p.platform === pl ? 'selected' : ''}>${pl}</option>`).join('')}
           </select>
         </div>
         
         <div>
-          <label>رقم المنشور (النوع)</label>
-          <select onchange="posts[${i}].category=this.value">
+          <label style="font-size:12px;">رقم المنشور (النوع)</label>
+          <select onchange="posts[${i}].category=this.value" style="width:100%; padding:8px; border-radius:8px; border:1.5px solid var(--g200);">
             ${cats.map(c => `<option value="${c}" ${p.category === c ? 'selected' : ''}>${c}</option>`).join('')}
           </select>
         </div>
@@ -213,7 +211,6 @@ function renderPosts() {
     </div>
   `).join('');
 }
-
 // ── عرض المنشورات المجدولة ──
 function renderSched() {
   const el = document.getElementById('schedList');
