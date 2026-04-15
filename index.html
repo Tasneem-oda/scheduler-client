@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة التحكم الذكية</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>نظام الجدولة الذكي | لوحة التحكم</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
+    /* ── التنسيقات الأساسية ── */
     *{margin:0;padding:0;box-sizing:border-box}
     :root{
       --p:#4f46e5;--pl:#ede9fe;--pd:#3730a3;
@@ -18,488 +19,211 @@
     }
     body{font-family:'Cairo',sans-serif;background:var(--g50);color:var(--g800);min-height:100vh}
 
-    /* ── States ── */
+    /* ── States (Loading/Error) ── */
     .full-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
     .spinner{width:48px;height:48px;border:3px solid var(--g200);border-top-color:var(--p);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
     @keyframes spin{to{transform:rotate(360deg)}}
     .err-icon{width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:20px}
-    .err-title{font-size:20px;font-weight:700;margin-bottom:8px}
-    .err-sub{color:var(--g400);max-width:320px;font-size:14px;line-height:1.6}
-    .err-btn{margin-top:24px;padding:12px 28px;border-radius:var(--rs);font-family:'Cairo';font-weight:700;font-size:14px;cursor:pointer;border:none;text-decoration:none;display:inline-block}
 
     /* ── Header ── */
     .hdr{background:var(--p);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(79,70,229,.3)}
-    .hdr-logo{display:flex;align-items:center;gap:10px}
     .hdr-logo span{font-size:15px;font-weight:700;color:#fff}
     .client-badge{background:rgba(255,255,255,.2);color:#fff;padding:4px 14px;border-radius:999px;font-size:13px;font-weight:600}
 
     /* ── Stats ── */
     .stats{background:#fff;border-bottom:1px solid var(--g200);display:flex;overflow-x:auto}
     .stat{padding:14px 20px;text-align:center;border-left:1px solid var(--g200);flex:1;min-width:100px}
-    .stat:last-child{border-left:none}
     .stat-val{font-size:22px;font-weight:700;line-height:1;margin-bottom:4px}
     .stat-lbl{font-size:11px;color:var(--g400)}
 
     /* ── Tabs ── */
     .tabs{background:#fff;border-bottom:1px solid var(--g200);display:flex;padding:0 16px}
-    .tab{padding:13px 16px;border:none;background:none;font-family:'Cairo';font-size:13px;font-weight:600;color:var(--g400);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;white-space:nowrap}
+    .tab{padding:13px 16px;border:none;background:none;font-family:'Cairo';font-size:13px;font-weight:600;color:var(--g400);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
     .tab.on{color:var(--p);border-bottom-color:var(--p)}
 
     /* ── Content ── */
     .content{max-width:780px;margin:0 auto;padding:20px 14px}
-
-    /* ── Card ── */
     .card{background:#fff;border-radius:var(--r);border:1px solid var(--g200);padding:18px;margin-bottom:14px}
     .card-title{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
 
-    /* ── Forms ── */
+    /* ── UI Elements ── */
     label{display:block;font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px}
-    input,select,textarea{width:100%;font-family:'Cairo';font-size:13px;border:1.5px solid var(--g200);border-radius:var(--rs);padding:9px 12px;color:var(--g800);background:#fff;outline:none;transition:border-color .2s}
-    input:focus,select:focus,textarea:focus{border-color:var(--p)}
+    input,select,textarea{width:100%;font-family:'Cairo';font-size:13px;border:1.5px solid var(--g200);border-radius:var(--rs);padding:9px 12px;outline:none}
     textarea{resize:vertical;min-height:110px;line-height:1.7}
-    .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-
-    /* ── Buttons ── */
-    .btn{font-family:'Cairo';font-size:13px;font-weight:700;padding:9px 18px;border-radius:var(--rs);border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
+    .btn{font-family:'Cairo';font-size:13px;font-weight:700;padding:10px 18px;border-radius:var(--rs);border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
     .btn-p{background:var(--p);color:#fff}
-    .btn-p:hover{background:var(--pd)}
-    .btn-p:disabled{background:var(--g400);cursor:not-allowed}
     .btn-o{background:#fff;border:1.5px solid var(--g200);color:var(--g600)}
-    .btn-o:hover{border-color:var(--p);color:var(--p)}
-    .btn-full{width:100%;justify-content:center;padding:13px;font-size:15px;border-radius:var(--r)}
-    .btn-del{background:none;border:none;cursor:pointer;color:var(--d);padding:4px;display:flex}
 
-    /* ── Post Card ── */
-    .post-item{background:var(--g50);border:1.5px solid var(--g200);border-radius:var(--r);padding:14px;margin-bottom:10px;transition:border-color .2s}
-    .post-item:hover{border-color:#c7d2fe}
+    /* ── List Items ── */
+    .post-item{background:var(--g50);border:1.5px solid var(--g200);border-radius:var(--r);padding:14px;margin-bottom:10px}
     .post-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-    .post-num{background:var(--p);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
-    .post-date-preview{font-size:11px;color:var(--g400);margin-top:6px}
-
-    /* ── Info Box ── */
-    .info{background:var(--pl);border-radius:var(--rs);padding:10px 14px;font-size:12px;color:var(--p);display:flex;align-items:flex-start;gap:8px;margin-bottom:14px;line-height:1.6}
-
-    /* ── Scheduled Posts ── */
+    .post-num{background:var(--p);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px}
     .sched-item{padding:14px 0;border-bottom:1px solid var(--g200);display:flex;gap:12px}
-    .sched-item:last-child{border-bottom:none}
-    .badge{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;flex-shrink:0}
-    .b-pending{background:var(--wl);color:var(--w)}
+    .badge{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600}
     .b-published{background:var(--sl);color:var(--s)}
-    .b-failed{background:var(--dl);color:var(--d)}
-    .b-processing{background:var(--pl);color:var(--p)}
-    .platform-tag{background:var(--pl);color:var(--p);padding:3px 10px;border-radius:999px;font-size:11px}
-
-    /* ── Empty State ── */
-    .empty{text-align:center;padding:40px 20px;color:var(--g400)}
-    .empty-icon{font-size:48px;margin-bottom:12px}
-
-    /* ── Toast ── */
-    #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--g800);color:#fff;padding:12px 22px;border-radius:var(--r);font-size:13px;z-index:9999;display:none;white-space:nowrap}
+    .b-pending{background:var(--wl);color:var(--w)}
+    
+    #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--g800);color:#fff;padding:12px 22px;border-radius:var(--r);font-size:13px;z-index:9999;display:none}
     #toast.on{display:block;animation:slideUp .3s ease}
-    @keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(16px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-
-    /* ── Divider ── */
-    hr{border:none;border-top:1px solid var(--g200);margin:14px 0}
-
-    @media(max-width:580px){.row2,.row3{grid-template-columns:1fr}.stat{min-width:80px;padding:10px 12px}.stat-val{font-size:18px}}
+    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:580px){.row3{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 
-<!-- ═══ STATE: Loading ═══ -->
-<div id="s-loading" class="full-page">
-  <div class="spinner"></div>
-  <p style="color:var(--g400);font-size:13px">جاري تحميل بياناتك…</p>
-</div>
-
-<!-- ═══ STATE: Not Found ═══ -->
-<div id="s-notfound" class="full-page" style="display:none">
-  <div class="err-icon" style="background:var(--g100)">🔍</div>
-  <p class="err-title">الرابط غير صحيح</p>
-  <p class="err-sub">لم يتم العثور على حساب مرتبط بهذا الرابط. تأكد من الرابط أو تواصل مع الدعم.</p>
-</div>
-
-<!-- ═══ STATE: Not Paid ═══ -->
-<div id="s-notpaid" class="full-page" style="display:none">
-  <div class="err-icon" style="background:var(--wl)">💳</div>
-  <p class="err-title">الاشتراك غير مفعّل</p>
-  <p class="err-sub">حسابك موجود لكن الاشتراك لم يُفعَّل بعد. تواصل معنا لتفعيل خدمتك والبدء فوراً.</p>
-  <a href="https://wa.me/YOUR_WHATSAPP_NUMBER" class="err-btn" style="background:#16a34a;color:#fff">💬 تواصل على واتساب</a>
-</div>
-
-<!-- ═══ STATE: Network Error ═══ -->
-<div id="s-network" class="full-page" style="display:none">
-  <div class="err-icon" style="background:var(--dl)">⚠️</div>
-  <p class="err-title">خطأ في الاتصال</p>
-  <p class="err-sub">تعذّر الاتصال بالخادم. تحقق من اتصالك بالإنترنت وأعد المحاولة.</p>
-  <button class="err-btn" onclick="location.reload()" style="background:var(--p);color:#fff">🔄 إعادة المحاولة</button>
-</div>
-
-<!-- ═══ STATE: Main ═══ -->
+<div id="s-loading" class="full-page"><div class="spinner"></div><p>جاري تحميل بياناتك...</p></div>
+<div id="s-notfound" class="full-page" style="display:none"><div class="err-icon" style="background:var(--g100)">🔍</div><p>الرابط غير صحيح أو العميل غير موجود.</p></div>
 <div id="s-main" style="display:none">
-
-  <!-- Header -->
   <div class="hdr">
-    <div class="hdr-logo">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-      <span>نظام الجدولة الذكي</span>
-    </div>
+    <div class="hdr-logo"><span>نظام الجدولة الذكي</span></div>
     <span class="client-badge" id="clientNameBadge">—</span>
   </div>
 
-  <!-- Stats -->
   <div class="stats">
-    <div class="stat">
-      <div class="stat-val" id="statTotal" style="color:var(--p)">—</div>
-      <div class="stat-lbl">إجمالي المنشورات</div>
-    </div>
-    <div class="stat">
-      <div class="stat-val" id="statPending" style="color:var(--w)">—</div>
-      <div class="stat-lbl">في الانتظار</div>
-    </div>
-    <div class="stat">
-      <div class="stat-val" id="statPublished" style="color:var(--s)">—</div>
-      <div class="stat-lbl">تم النشر</div>
-    </div>
+    <div class="stat"><div class="stat-val" id="statTotal">—</div><div class="stat-lbl">إجمالي المنشورات</div></div>
+    <div class="stat"><div class="stat-val" id="statPending" style="color:var(--w)">—</div><div class="stat-lbl">مجدول</div></div>
+    <div class="stat"><div class="stat-val" id="statPublished" style="color:var(--s)">—</div><div class="stat-lbl">تم النشر</div></div>
   </div>
 
-  <!-- Tabs -->
   <div class="tabs">
-    <button class="tab on" onclick="switchTab('add',this)">➕ إضافة منشورات</button>
+    <button class="tab on" onclick="switchTab('add',this)">➕ إضافة</button>
     <button class="tab" onclick="switchTab('sched',this)">📅 المجدولة</button>
   </div>
 
-  <!-- ── TAB: Add Posts ── -->
   <div id="tab-add" class="content">
-
-    <!-- Schedule Settings -->
     <div class="card">
-      <div class="card-title">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--p)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        إعدادات الجدولة التلقائية
-      </div>
-      <div class="row3" style="margin-bottom:12px">
-        <div>
-          <label>تاريخ البداية</label>
-          <input type="date" id="startDate" onchange="updatePreview()">
-        </div>
-        <div>
-          <label>وقت النشر اليومي</label>
-          <input type="time" id="postTime" value="12:00" onchange="updatePreview()">
-        </div>
-        <div>
-          <label>التكرار</label>
-          <select id="freq" onchange="updatePreview()">
-            <option value="1">كل يوم</option>
-            <option value="2">كل يومين</option>
-            <option value="3">كل 3 أيام</option>
-            <option value="7">أسبوعيًا</option>
-          </select>
-        </div>
-      </div>
-      <div class="info" id="schedPreview">
-        📌 اختر تاريخ البداية والوقت لرؤية الجدول المتوقع
+      <div class="card-title">إعدادات الجدولة</div>
+      <div class="row3">
+        <div><label>تاريخ البداية</label><input type="date" id="startDate" onchange="updatePreview()"></div>
+        <div><label>وقت النشر اليومي</label><input type="time" id="postTime" value="12:00" onchange="updatePreview()"></div>
+        <div><label>التكرار</label><select id="freq" onchange="updatePreview()"><option value="1">يومياً</option><option value="2">يومين</option><option value="7">أسبوعياً</option></select></div>
       </div>
     </div>
-
-    <!-- Posts List -->
     <div id="postsList"></div>
-
-    <!-- Add Button -->
-    <button class="btn btn-o" style="width:100%;justify-content:center;padding:11px;margin-bottom:14px" onclick="addPost()">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      إضافة منشور جديد
-    </button>
-
-    <!-- Submit -->
-    <button class="btn btn-p btn-full" id="submitBtn" onclick="submitPosts()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-      إرسال جميع المنشورات للجدولة
-    </button>
+    <button class="btn btn-o w-100" style="width:100%; margin-bottom:10px" onclick="addPost()">+ إضافة منشور آخر</button>
+    <button class="btn btn-p w-100" id="submitBtn" style="width:100%" onclick="submitPosts()">إرسال للجدولة الآن</button>
   </div>
 
-  <!-- ── TAB: Scheduled Posts ── -->
   <div id="tab-sched" class="content" style="display:none">
-    <div class="card">
-      <div class="card-title">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--p)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        المنشورات المجدولة
-      </div>
-      <div id="schedList"></div>
-    </div>
+    <div class="card"><div id="schedList"></div></div>
   </div>
-
-</div><!-- end s-main -->
-
+</div>
 <div id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════
-// CONFIG — غيّري هذا فقط
-// ═══════════════════════════════════════════
+// ── CONFIG ──
 const N8N = 'https://tasneemahmed-n8n-test.hf.space';
-// ═══════════════════════════════════════════
-
-const params   = new URLSearchParams(location.search);
+const params = new URLSearchParams(location.search);
 const clientId = params.get('id');
 
-let client    = null;
-let sched     = [];
-let posts     = [];
-let postCnt   = 0;
-
-const CAT_LABELS = { first:'تدبر قرآني', second:'قصص تاريخية', third:'قصص الأنبياء' };
-const PLAT_LABELS = { facebook:'📘 فيسبوك', instagram:'📸 إنستغرام', twitter:'🐦 تويتر', linkedin:'💼 لينكد إن' };
-const STATUS_INFO = {
-  pending:    { cls:'b-pending',    txt:'في الانتظار' },
-  published:  { cls:'b-published',  txt:'تم النشر' },
-  failed:     { cls:'b-failed',     txt:'فشل النشر' },
-  processing: { cls:'b-processing', txt:'قيد المعالجة' }
-};
-
-// ── State ──
-function show(id) {
-  ['loading','notfound','notpaid','network','main'].forEach(s=>{
-    const el = document.getElementById('s-'+s);
-    if(el) el.style.display = (s===id?'block':'none');
-  });
-}
+let client = null;
+let sched = [];
+let posts = [];
+let postCnt = 0;
 
 // ── Init ──
 async function init() {
-  show('loading');
   if (!clientId) { show('notfound'); return; }
-
   try {
-    const res = await fetch(`${N8N}/webhook/client-data?id=${encodeURIComponent(clientId)}`);
-    if (!res.ok) throw new Error('server');
+    const res = await fetch(`${N8N}/webhook/client-data?id=${clientId}`);
     const data = await res.json();
-
-    if (!data || !data.found)          { show('notfound'); return; }
-    if (!data.payment_status)          { show('notpaid');  return; }
-
+    if (!data.found) { show('notfound'); return; }
     client = data;
-    sched  = data.scheduled_posts || [];
+    sched = data.scheduled_posts || [];
     renderMain();
     show('main');
-  } catch(e) {
-    console.error(e);
-    show('network');
-  }
+  } catch(e) { show('notfound'); }
 }
 
-// ── Render Main ──
+function show(id) {
+  ['loading','notfound','main'].forEach(s=> document.getElementById('s-'+s).style.display = (s===id?'block':'none'));
+}
+
 function renderMain() {
-  document.getElementById('clientNameBadge').textContent = client.clint_name || 'عميل';
+  document.getElementById('clientNameBadge').textContent = client.clint_name;
   updateStats();
-
-  // Default date = tomorrow
   const tom = new Date(); tom.setDate(tom.getDate()+1);
-  const sd = document.getElementById('startDate');
-  sd.value = tom.toISOString().split('T')[0];
-  sd.min   = new Date().toISOString().split('T')[0];
-
+  document.getElementById('startDate').value = tom.toISOString().split('T')[0];
   addPost();
-  updatePreview();
   renderSched();
 }
 
 function updateStats() {
-  document.getElementById('statTotal').textContent     = sched.length;
-  document.getElementById('statPending').textContent   = sched.filter(p=>p.status==='pending').length;
-  document.getElementById('statPublished').textContent = sched.filter(p=>p.status==='published').length;
+  document.getElementById('statTotal').textContent = sched.length;
+  document.getElementById('statPending').textContent = sched.filter(p=>p.status!=='publishd').length;
+  document.getElementById('statPublished').textContent = sched.filter(p=>p.status==='publishd').length;
 }
 
-// ── Schedule Preview ──
-function updatePreview() {
-  const d = document.getElementById('startDate').value;
-  const t = document.getElementById('postTime').value;
-  const f = parseInt(document.getElementById('freq').value);
-  if (!d || !t) return;
-  const fTxt = f===1 ? 'يوميًا' : `كل ${f} أيام`;
-  document.getElementById('schedPreview').innerHTML =
-    `📌 النشر يبدأ <strong>${d}</strong> الساعة <strong>${t}</strong> ${fTxt} — إجمالي <strong>${posts.length}</strong> منشور`;
-  renderPostDatePreviews();
-}
-
-function getPostDate(idx) {
-  const d = document.getElementById('startDate').value;
-  const t = document.getElementById('postTime').value;
-  const f = parseInt(document.getElementById('freq').value||1);
-  if (!d || !t) return '—';
-  const dt = new Date(`${d}T${t}:00`);
-  dt.setDate(dt.getDate() + idx * f);
-  return dt.toLocaleString('ar-EG',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-}
-
-function renderPostDatePreviews() {
-  posts.forEach((p,i)=>{
-    const el = document.getElementById('date-'+p.id);
-    if(el) el.textContent = '📅 سينشر: ' + getPostDate(i);
-  });
-}
-
-// ── Posts ──
+// ── Posts Logic ──
 function addPost() {
   const platforms = client?.custom_config?.platforms || ['facebook'];
-  const prompts   = client?.custom_config?.user_prompt || {};
-  const cats      = Object.keys(prompts);
-  posts.push({ id:++postCnt, text:'', platform:platforms[0], category:cats[0]||'general' });
+  const prompts = client?.custom_config?.prompts || {};
+  const cats = Object.keys(prompts);
+  posts.push({ id:++postCnt, text:'', platform:platforms[0], category:cats[0] });
   renderPosts();
-  updatePreview();
-}
-
-function removePost(id) {
-  if (posts.length===1) { toast('يجب أن يكون هناك منشور واحد على الأقل'); return; }
-  posts = posts.filter(p=>p.id!==id);
-  renderPosts();
-  updatePreview();
-}
-
-function updateField(id, field, val) {
-  const p = posts.find(x=>x.id===id);
-  if(p) p[field]=val;
 }
 
 function renderPosts() {
   const platforms = client?.custom_config?.platforms || ['facebook'];
-  const prompts   = client?.custom_config?.user_prompt || {};
-  const cats      = Object.keys(prompts);
-  const multiPlat = platforms.length > 1;
-  const multiCat  = cats.length > 1;
-
+  const cats = Object.keys(client?.custom_config?.prompts || {});
+  
   document.getElementById('postsList').innerHTML = posts.map((p,i)=>`
     <div class="post-item">
-      <div class="post-hdr">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="post-num">${i+1}</div>
-          <span style="font-size:12px;color:var(--g400)">منشور ${i+1}</span>
-        </div>
-        <button class="btn-del" onclick="removePost(${p.id})" title="حذف">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-        </button>
+      <div class="post-hdr"><div class="post-num">${i+1}</div></div>
+      <textarea oninput="posts[${i}].text=this.value" placeholder="اكتب نص المنشور...">${p.text}</textarea>
+      <div class="row3" style="margin-top:10px">
+        ${platforms.length > 1 ? `<div><label>المنصة</label><select onchange="posts[${i}].platform=this.value">${platforms.map(pl=>`<option value="${pl}">${pl}</option>`).join('')}</select></div>`:''}
+        ${cats.length > 1 ? `<div><label>النوع</label><select onchange="posts[${i}].category=this.value">${cats.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div>`:''}
       </div>
-
-      <div style="margin-bottom:${(multiPlat||multiCat)?'10px':'0'}">
-        <label>نص المنشور</label>
-        <textarea placeholder="اكتب نص المنشور هنا…"
-          oninput="updateField(${p.id},'text',this.value)"
-        >${p.text}</textarea>
-      </div>
-
-      ${(multiPlat||multiCat) ? `
-      <div class="${multiPlat&&multiCat?'row2':''}">
-        ${multiPlat ? `
-        <div>
-          <label>المنصة</label>
-          <select onchange="updateField(${p.id},'platform',this.value)">
-            ${platforms.map(pl=>`<option value="${pl}" ${p.platform===pl?'selected':''}>${PLAT_LABELS[pl]||pl}</option>`).join('')}
-          </select>
-        </div>` : ''}
-        ${multiCat ? `
-        <div>
-          <label>نوع المحتوى</label>
-          <select onchange="updateField(${p.id},'category',this.value)">
-            ${cats.map(c=>`<option value="${c}" ${p.category===c?'selected':''}>${CAT_LABELS[c]||c}</option>`).join('')}
-          </select>
-        </div>` : ''}
-      </div>` : ''}
-
-      <p class="post-date-preview" id="date-${p.id}">📅 سينشر: —</p>
     </div>
   `).join('');
-
-  renderPostDatePreviews();
 }
 
-// ── Scheduled Posts ──
+// ── Scheduled List ──
 function renderSched() {
   const el = document.getElementById('schedList');
-  if (!sched.length) {
-    el.innerHTML=`<div class="empty"><div class="empty-icon">📭</div><p>لا توجد منشورات مجدولة حتى الآن</p></div>`;
-    return;
-  }
-  el.innerHTML = sched.map(p=>{
-    const si  = STATUS_INFO[p.status] || STATUS_INFO.pending;
-    const dt  = p.scheduled_at ? new Date(p.scheduled_at).toLocaleString('ar-EG') : '—';
-    const txt = (p.post_text||'').slice(0,120) + ((p.post_text||'').length>120?'…':'');
-    return `
-      <div class="sched-item">
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">
-            <span class="badge ${si.cls}">${si.txt}</span>
-            <span class="platform-tag">${PLAT_LABELS[p.platform]||p.platform||'—'}</span>
-            <span style="font-size:11px;color:var(--g400)">${dt}</span>
-          </div>
-          <p style="font-size:13px;color:var(--g600);line-height:1.6">${txt}</p>
-        </div>
-      </div>`;
-  }).join('');
+  if (!sched.length) { el.innerHTML = '<p class="text-center">لا يوجد منشورات.</p>'; return; }
+  el.innerHTML = sched.map(p=>`
+    <div class="sched-item">
+      <div style="flex:1">
+        <span class="badge ${p.status==='publishd'?'b-published':'b-pending'}">${p.status==='publishd'?'تم النشر':'مجدول'}</span>
+        <span style="font-size:11px; color:var(--g400)">${p.posting_time ? new Date(p.posting_time).toLocaleString('ar-EG') : '—'}</span>
+        <p style="font-size:13px; margin-top:5px">${p.post_text.slice(0,100)}...</p>
+      </div>
+    </div>
+  `).join('');
 }
 
-// ── Tabs ──
 function switchTab(name, btn) {
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
-  document.getElementById('tab-add').style.display   = name==='add'  ? 'block':'none';
-  document.getElementById('tab-sched').style.display = name==='sched'? 'block':'none';
+  document.getElementById('tab-add').style.display = name==='add'?'block':'none';
+  document.getElementById('tab-sched').style.display = name==='sched'?'block':'none';
 }
 
-// ── Submit ──
 async function submitPosts() {
   const d = document.getElementById('startDate').value;
   const t = document.getElementById('postTime').value;
   const f = parseInt(document.getElementById('freq').value);
-
-  if (!d||!t)       { toast('⚠️ اختر تاريخ البداية والوقت أولاً'); return; }
-  if (posts.some(p=>!p.text.trim())) { toast('⚠️ يوجد منشورات فارغة — اكتب النص أو احذفها'); return; }
-
+  
   const payload = posts.map((p,i)=>{
     const dt = new Date(`${d}T${t}:00`);
     dt.setDate(dt.getDate() + i*f);
-    return { client_id:clientId, post_text:p.text.trim(), platform:p.platform, category:p.category, scheduled_at:dt.toISOString() };
+    return { client_id:clientId, post_text:p.text, platform:p.platform, category:p.category, posting_time:dt.toISOString() };
   });
-
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.innerHTML = '⏳ جاري الإرسال…';
 
   try {
     const res = await fetch(`${N8N}/webhook/submit-posts`, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ client_id:clientId, posts:payload })
+      body: JSON.stringify({ posts:payload })
     });
-    if (!res.ok) throw new Error('server');
-    toast(`✅ تم إرسال ${posts.length} منشور بنجاح!`);
-    posts=[];
-    addPost();
-    await refreshSched();
-  } catch(e) {
-    toast('❌ حدث خطأ أثناء الإرسال — حاول مرة أخرى');
-  } finally {
-    btn.disabled=false;
-    btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> إرسال جميع المنشورات للجدولة';
-  }
+    if(res.ok) { toast('✅ تم الحفظ بنجاح'); location.reload(); }
+  } catch(e) { toast('❌ خطأ في الإرسال'); }
 }
 
-async function refreshSched() {
-  try {
-    const res  = await fetch(`${N8N}/webhook/client-data?id=${encodeURIComponent(clientId)}`);
-    const data = await res.json();
-    if (data.found) { sched=data.scheduled_posts||[]; updateStats(); renderSched(); }
-  } catch(e){}
-}
-
-// ── Toast ──
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent=msg; t.classList.add('on');
-  setTimeout(()=>t.classList.remove('on'), 3500);
-}
-
-// ── Run ──
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3000)}
 init();
 </script>
 </body>
