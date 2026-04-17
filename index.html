@@ -1,117 +1,3 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>نظام الجدولة الذكي | لوحة التحكم</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    /* ── التنسيقات الأساسية (تم الحفاظ عليها بالكامل) ── */
-    *{margin:0;padding:0;box-sizing:border-box}
-    :root{
-      --p:#4f46e5;--pl:#ede9fe;--pd:#3730a3;
-      --s:#16a34a;--sl:#dcfce7;
-      --w:#d97706;--wl:#fef3c7;
-      --d:#dc2626;--dl:#fee2e2;
-      --g50:#f8fafc;--g100:#f1f5f9;--g200:#e2e8f0;
-      --g400:#94a3b8;--g600:#475569;--g800:#1e293b;
-      --r:12px;--rs:8px
-    }
-    body{font-family:'Cairo',sans-serif;background:var(--g50);color:var(--g800);min-height:100vh}
-    .full-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
-    .spinner{width:48px;height:48px;border:3px solid var(--g200);border-top-color:var(--p);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .hdr{background:var(--p);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(79,70,229,.3)}
-    .hdr-logo span{font-size:15px;font-weight:700;color:#fff}
-    .client-badge{background:rgba(255,255,255,.2);color:#fff;padding:4px 14px;border-radius:999px;font-size:13px;font-weight:600}
-    .stats{background:#fff;border-bottom:1px solid var(--g200);display:flex;overflow-x:auto}
-    .stat{padding:14px 20px;text-align:center;border-left:1px solid var(--g200);flex:1;min-width:100px}
-    .stat:last-child{border-left:none}
-    .stat-val{font-size:22px;font-weight:700;line-height:1;margin-bottom:4px}
-    .stat-lbl{font-size:11px;color:var(--g400)}
-    .tabs{background:#fff;border-bottom:1px solid var(--g200);display:flex;padding:0 16px}
-    .tab{padding:13px 16px;border:none;background:none;font-family:'Cairo';font-size:13px;font-weight:600;color:var(--g400);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
-    .tab.on{color:var(--p);border-bottom-color:var(--p)}
-    .content{max-width:900px;margin:0 auto;padding:20px 14px}
-    .card{background:#fff;border-radius:var(--r);border:1px solid var(--g200);padding:18px;margin-bottom:14px}
-    .carousel-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; background: #fff; padding: 10px; border-radius: var(--r); border: 1px solid var(--g200); }
-    .nav-btn { background: var(--pl); color: var(--p); border: none; padding: 5px 15px; border-radius: var(--rs); font-weight: bold; cursor: pointer; }
-    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .slide-title { font-weight: 700; font-size: 16px; color: var(--g800); }
-    .table-container { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-    th { text-align: right; background: var(--g100); padding: 12px; color: var(--g600); font-weight: 700; border-bottom: 2px solid var(--g200); }
-    td { padding: 12px; border-bottom: 1px solid var(--g100); vertical-align: middle; }
-    .status-row-published { background-color: rgba(22, 163, 74, 0.05); }
-    .status-row-pending { background-color: rgba(217, 119, 6, 0.05); }
-    .post-text-cell { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--g600); }
-    .action-btns { display: flex; gap: 8px; }
-    .btn-edit { color: var(--p); background: var(--pl); border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-    .btn-delete { color: var(--d); background: var(--dl); border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-    label{display:block;font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px}
-    input,select,textarea{width:100%;font-family:'Cairo';font-size:13px;border:1.5px solid var(--g200);border-radius:var(--rs);padding:9px 12px;outline:none}
-    textarea{resize:vertical;min-height:110px;line-height:1.7}
-    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-    .btn{font-family:'Cairo';font-size:13px;font-weight:700;padding:10px 18px;border-radius:var(--rs);border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
-    .btn-p{background:var(--p);color:#fff}
-    .btn-o{background:#fff;border:1.5px solid var(--g200);color:var(--g600)}
-    .post-item{background:var(--g50);border:1.5px solid var(--g200);border-radius:var(--r);padding:14px;margin-bottom:10px}
-    .post-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-    .post-num{background:var(--p);color:#fff;width:25px;height:25px;border-radius:50%;text-align:center;font-size:12px;line-height:25px}
-    #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--g800);color:#fff;padding:12px 22px;border-radius:var(--r);font-size:13px;z-index:9999;display:none}
-    #toast.on{display:block;animation:slideUp .3s ease}
-    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-    @media(max-width:580px){.row3{grid-template-columns:1fr}}
-  </style>
-</head>
-<body>
-
-<div id="s-loading" class="full-page"><div class="spinner"></div><p>جاري تحميل بياناتك...</p></div>
-<div id="s-notfound" class="full-page" style="display:none"><p>الرابط غير صحيح أو العميل غير موجود.</p></div>
-
-<div id="s-main" style="display:none">
-  <div class="hdr">
-    <div class="hdr-logo"><span>نظام الجدولة الذكي</span></div>
-    <span class="client-badge" id="clientNameBadge">—</span>
-  </div>
-
-  <div class="stats">
-    <div class="stat"><div class="stat-val" id="statTotal">—</div><div class="stat-lbl">إجمالي المنشورات</div></div>
-    <div class="stat"><div class="stat-val" id="statPending" style="color:var(--w)">—</div><div class="stat-lbl">مجدول</div></div>
-    <div class="stat"><div class="stat-val" id="statPublished" style="color:var(--s)">—</div><div class="stat-lbl">تم النشر</div></div>
-  </div>
-
-  <div class="tabs">
-    <button class="tab on" onclick="switchTab('add',this)">➕ إضافة منشورات</button>
-    <button class="tab" onclick="switchTab('sched',this)">📅 عرض الجداول</button>
-  </div>
-
-  <div id="tab-add" class="content">
-    <div class="card">
-      <div class="card-title">إعدادات الجدولة</div>
-      <div class="row3">
-        <div><label>تاريخ البداية</label><input type="date" id="startDate" onchange="updatePreview()"></div>
-        <div><label>وقت النشر اليومي</label><input type="time" id="postTime" value="12:00" onchange="updatePreview()"></div>
-        <div><label>التكرار</label><select id="freq" onchange="updatePreview()"><option value="1">يومياً</option><option value="2">يومين</option><option value="7">أسبوعياً</option></select></div>
-      </div>
-    </div>
-    <div id="postsList"></div>
-    <button class="btn btn-o w-100" style="width:100%; margin-bottom:10px" onclick="addPost()">+ إضافة منشور آخر</button>
-    <button class="btn btn-p w-100" id="submitBtn" style="width:100%" onclick="submitPosts()">إرسال للجدولة الآن</button>
-  </div>
-
-  <div id="tab-sched" class="content" style="display:none">
-    <div class="carousel-nav">
-      <button class="nav-btn" onclick="prevSlide()" id="prevBtn">السابق</button>
-      <div class="slide-title" id="currentSlideTitle">النوع: ...</div>
-      <button class="nav-btn" onclick="nextSlide()" id="nextBtn">التالي</button>
-    </div>
-    <div id="tablesCarousel"></div>
-  </div>
-</div>
-
-<div id="toast"></div>
-
 <script>
 const N8N = 'https://tasneemahmed-n8n-test.hf.space';
 const params = new URLSearchParams(location.search);
@@ -124,15 +10,19 @@ let postCnt = 0;
 let currentSlideIdx = 0;
 let categories = [];
 
+// ── 1. جلب بيانات العميل والمنشورات ──
 async function init() {
   if (!clientId) { show('notfound'); return; }
   try {
     const res = await fetch(`${N8N}/webhook/client-data?id=${clientId}`);
     const data = await res.json();
     if (!data || !data.found) { show('notfound'); return; }
+    
     client = data;
     sched = data.scheduled_posts || [];
+    // استخراج الأنواع من user_prompt كما في الداتابيز
     categories = Object.keys(client.custom_config?.user_prompt || {});
+    
     renderMain();
     show('main');
   } catch(e) { show('notfound'); }
@@ -157,11 +47,18 @@ function updateStats() {
   document.getElementById('statPublished').textContent = sched.filter(p=>p.status==='publishd').length;
 }
 
+// ── 2. منطق الإضافة (Create) ──
 function addPost() {
   const platforms = client?.custom_config?.platforms || ['facebook'];
   const prompts = client?.custom_config?.user_prompt || {};
   const cats = Object.keys(prompts); 
-  posts.push({ id: ++postCnt, text: '', platform: platforms[0], category: cats[0] || 'default' });
+  
+  posts.push({ 
+    id: ++postCnt, 
+    text: '', 
+    platform: platforms[0], 
+    category: cats[0] || 'default' 
+  });
   renderPosts();
 }
 
@@ -172,16 +69,20 @@ function removePost(idx) {
 function renderPosts() {
   const platforms = client?.custom_config?.platforms || ['facebook'];
   const cats = Object.keys(client?.custom_config?.user_prompt || {});
+  
   document.getElementById('postsList').innerHTML = posts.map((p, i) => `
     <div class="post-item">
-      <div class="post-hdr"><div class="post-num">${i + 1}</div><button onclick="removePost(${i})" style="color:var(--d); background:none; border:none; cursor:pointer;">🗑️</button></div>
+      <div class="post-hdr">
+        <div class="post-num">${i + 1}</div>
+        <button onclick="removePost(${i})" style="color:var(--d); background:none; border:none; cursor:pointer;">🗑️</button>
+      </div>
       <label>نص المنشور</label>
       <textarea oninput="posts[${i}].text=this.value" placeholder="اكتب نص المنشور هنا...">${p.text}</textarea>
       <div class="row2" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
         <div><label>المنصة</label><select onchange="posts[${i}].platform=this.value">
           ${platforms.map(pl => `<option value="${pl}" ${p.platform === pl ? 'selected' : ''}>${pl}</option>`).join('')}
         </select></div>
-        <div><label>النوع</label><select onchange="posts[${i}].category=this.value">
+        <div><label>النوع (رقم المنشور)</label><select onchange="posts[${i}].category=this.value">
           ${cats.map(c => `<option value="${c}" ${p.category === c ? 'selected' : ''}>${c}</option>`).join('')}
         </select></div>
       </div>
@@ -189,10 +90,11 @@ function renderPosts() {
   `).join('');
 }
 
+// ── 3. منطق الجداول (Carousel) ──
 function renderCarousel() {
   const container = document.getElementById('tablesCarousel');
   if (categories.length === 0) {
-    container.innerHTML = '<p class="text-center text-muted">لا توجد أنواع معرفة.</p>';
+    container.innerHTML = '<p class="text-center text-muted">لا توجد أنواع معرفة في الإعدادات.</p>';
     return;
   }
   updateCarouselView();
@@ -204,29 +106,30 @@ function updateCarouselView() {
   document.getElementById('prevBtn').disabled = currentSlideIdx === 0;
   document.getElementById('nextBtn').disabled = currentSlideIdx === categories.length - 1;
 
+  // الربط مع عمود number_of_the_psot القادم من الداتابيز
   const filteredPosts = sched.filter(p => p.number_of_the_psot === cat);
   
   let tableHtml = `
     <div class="table-container">
       <table>
-        <thead><tr><th>الوقت والتاريخ</th><th>نص المنشور</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+        <thead><tr><th>الوقت</th><th>النص</th><th>الحالة</th><th>إجراءات</th></tr></thead>
         <tbody>
           ${filteredPosts.length > 0 ? filteredPosts.map(p => `
             <tr class="${p.status === 'publishd' ? 'status-row-published' : 'status-row-pending'}">
               <td>
-                <div style="font-weight:600; color:var(--g800)">${p.posting_time ? new Date(p.posting_time).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '—'}</div>
+                <div style="font-weight:600">${p.posting_time ? new Date(p.posting_time).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '—'}</div>
                 <div style="font-size:10px; color:var(--g400)">${p.posting_time ? new Date(p.posting_time).toLocaleDateString('ar-EG') : '—'}</div>
               </td>
               <td><div class="post-text-cell">${p.post_text}</div></td>
               <td><span class="badge ${p.status === 'publishd' ? 'b-published' : 'b-pending'}">${p.status === 'publishd' ? 'تم النشر' : 'مجدول'}</span></td>
               <td>
                 <div class="action-btns">
-                  <button class="btn-edit" onclick="editPost(${p.id})">تعديل</button>
-                  <button class="btn-delete" onclick="deletePost(${p.id})">حذف</button>
+                  <button class="btn-edit" onclick="editPost(${p.id})">✏️</button>
+                  <button class="btn-delete" onclick="deletePost(${p.id})">🗑️</button>
                 </div>
               </td>
             </tr>
-          `).join('') : '<tr><td colspan="4" class="text-center text-muted">لا توجد منشورات لهذا النوع.</td></tr>'}
+          `).join('') : '<tr><td colspan="4" class="text-center text-muted">لا يوجد منشورات.</td></tr>'}
         </tbody>
       </table>
     </div>
@@ -244,59 +147,20 @@ function switchTab(name, btn) {
   document.getElementById('tab-sched').style.display = name === 'sched' ? 'block' : 'none';
 }
 
-// ── CRUD Logic (Update/Delete/Create) ──
-
-async function editPost(id) {
-  const post = sched.find(p => p.id == id);
-  const newText = prompt("تعديل نص المنشور:", post.post_text);
-  if (newText === null || newText.trim() === post.post_text) return;
-
-  try {
-    const res = await fetch(`${N8N}/webhook/submit-posts`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        action: 'update',
-        posts: [{ 
-            id: id, 
-            client_id: clientId, 
-            post_text: newText.trim(),
-            category: post.number_of_the_psot,
-            posting_time: post.posting_time 
-        }]
-      })
-    });
-    if(res.ok) { toast('✅ تم التعديل بنجاح'); location.reload(); }
-  } catch(e) { toast('❌ خطأ في التعديل'); }
-}
-
-async function deletePost(id) {
-  if (!confirm('هل أنت متأكد من حذف هذا المنشور نهائياً؟')) return;
-  try {
-    const res = await fetch(`${N8N}/webhook/submit-posts`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        action: 'delete',
-        posts: [{ id: id, client_id: clientId }]
-      })
-    });
-    if(res.ok) { toast('✅ تم الحذف'); location.reload(); }
-  } catch(e) { toast('❌ خطأ في الحذف'); }
-}
+// ── 4. منطق التواصل الفعلي مع الوورك-فلو (The Bridge) ──
 
 async function submitPosts() {
   const d = document.getElementById('startDate').value;
   const t = document.getElementById('postTime').value;
   const f = parseInt(document.getElementById('freq').value);
-  if(!d || !t) { toast('⚠️ حدد وقت وتاريخ البداية'); return; }
+  if(!d || !t) { toast('⚠️ حدد الوقت والتاريخ'); return; }
 
   const payload = posts.map((p, i) => {
     const dt = new Date(`${d}T${t}:00`);
     dt.setDate(dt.getDate() + i * f);
     return { 
       client_id: clientId, 
-      workflow_id: client.workflow_id, // إضافة الـ workflow_id
+      workflow_id: client.workflow_id, // تم تضمينه بناءً على طلبك
       post_text: p.text, 
       platform: p.platform, 
       category: p.category, 
@@ -304,20 +168,55 @@ async function submitPosts() {
     };
   });
 
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...';
+  sendRequest('create', payload);
+}
 
+async function editPost(id) {
+  const post = sched.find(p => p.id == id);
+  const newText = prompt("تعديل نص المنشور:", post.post_text);
+  if (!newText || newText.trim() === post.post_text) return;
+
+  const payload = [{ 
+    id: id, 
+    client_id: clientId, 
+    post_text: newText.trim(),
+    category: post.number_of_the_psot,
+    posting_time: post.posting_time 
+  }];
+
+  sendRequest('update', payload);
+}
+
+async function deletePost(id) {
+  if (!confirm('حذف المنشور نهائياً؟')) return;
+  sendRequest('delete', [{ id: id, client_id: clientId }]);
+}
+
+// دالة الإرسال المركزية لتوحيد التواصل مع الـ Switch في n8n
+async function sendRequest(action, data) {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  
   try {
     const res = await fetch(`${N8N}/webhook/submit-posts`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ 
-          action: 'create', // إرسال العملية كـ إضافة
-          posts: payload 
+        action: action, 
+        posts: data 
       })
     });
-    if(res.ok) { toast('✅ تم الحفظ بنجاح'); location.reload(); }
-  } catch(e) { toast('❌ خطأ في الإرسال'); btn.disabled = false; btn.textContent = 'إرسال للجدولة الآن'; }
+    
+    if(res.ok) {
+      toast(`✅ تمت عملية ${action === 'create' ? 'الإضافة' : action === 'update' ? 'التعديل' : 'الحذف'} بنجاح`);
+      setTimeout(() => location.reload(), 1500);
+    } else {
+      throw new Error();
+    }
+  } catch(e) {
+    toast('❌ خطأ في الاتصال بالخادم');
+    btn.disabled = false;
+  }
 }
 
 function toast(m){
@@ -329,5 +228,3 @@ function toast(m){
 function updatePreview() {}
 init();
 </script>
-</body>
-</html>
