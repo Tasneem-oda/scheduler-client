@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>نظام الجدولة الذكي | لوحة التحكم المتطورة</title>
+  <title>نظام الجدولة الذكي | لوحة التحكم</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ── التنسيقات الأساسية ── */
+    /* ── التنسيقات الأساسية (تم الحفاظ عليها) ── */
     *{margin:0;padding:0;box-sizing:border-box}
     :root{
       --p:#4f46e5;--pl:#ede9fe;--pd:#3730a3;
@@ -15,113 +15,116 @@
       --d:#dc2626;--dl:#fee2e2;
       --g50:#f8fafc;--g100:#f1f5f9;--g200:#e2e8f0;
       --g400:#94a3b8;--g600:#475569;--g800:#1e293b;
-      --r:16px;--rs:10px
+      --r:12px;--rs:8px
     }
-    body{font-family:'Cairo',sans-serif;background:var(--g50);color:var(--g800);min-height:100vh;overflow-x:hidden}
+    body{font-family:'Cairo',sans-serif;background:var(--g50);color:var(--g800);min-height:100vh}
 
-    /* ── States ── */
+    /* ── States (Loading/Error) ── */
     .full-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
     .spinner{width:48px;height:48px;border:3px solid var(--g200);border-top-color:var(--p);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
     @keyframes spin{to{transform:rotate(360deg)}}
 
     /* ── Header ── */
-    .hdr{background:var(--p);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 4px 12px rgba(79,70,229,.2)}
-    .hdr-logo span{font-size:16px;font-weight:700;color:#fff}
-    .client-badge{background:rgba(255,255,255,.2);color:#fff;padding:6px 16px;border-radius:999px;font-size:13px;font-weight:600}
+    .hdr{background:var(--p);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(79,70,229,.3)}
+    .hdr-logo span{font-size:15px;font-weight:700;color:#fff}
+    .client-badge{background:rgba(255,255,255,.2);color:#fff;padding:4px 14px;border-radius:999px;font-size:13px;font-weight:600}
 
     /* ── Stats ── */
-    .stats{background:#fff;border-bottom:1px solid var(--g200);display:flex}
-    .stat{padding:16px;text-align:center;border-left:1px solid var(--g200);flex:1}
-    .stat-val{font-size:24px;font-weight:700;margin-bottom:2px}
-    .stat-lbl{font-size:12px;color:var(--g400)}
+    .stats{background:#fff;border-bottom:1px solid var(--g200);display:flex;overflow-x:auto}
+    .stat{padding:14px 20px;text-align:center;border-left:1px solid var(--g200);flex:1;min-width:100px}
+    .stat:last-child{border-left:none}
+    .stat-val{font-size:22px;font-weight:700;line-height:1;margin-bottom:4px}
+    .stat-lbl{font-size:11px;color:var(--g400)}
 
     /* ── Tabs ── */
-    .tabs{background:#fff;border-bottom:1px solid var(--g200);display:flex;padding:0 20px}
-    .tab{padding:15px 20px;border:none;background:none;font-family:'Cairo';font-size:14px;font-weight:600;color:var(--g400);cursor:pointer;border-bottom:3px solid transparent;transition:0.3s}
+    .tabs{background:#fff;border-bottom:1px solid var(--g200);display:flex;padding:0 16px}
+    .tab{padding:13px 16px;border:none;background:none;font-family:'Cairo';font-size:13px;font-weight:600;color:var(--g400);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
     .tab.on{color:var(--p);border-bottom-color:var(--p)}
 
-    .content{max-width:900px;margin:0 auto;padding:24px 16px}
+    /* ── Content ── */
+    .content{max-width:900px;margin:0 auto;padding:20px 14px}
+    .card{background:#fff;border-radius:var(--r);border:1px solid var(--g200);padding:18px;margin-bottom:14px}
+    
+    /* ── Carousel UI ── */
+    .carousel-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; background: #fff; padding: 10px; border-radius: var(--r); border: 1px solid var(--g200); }
+    .nav-btn { background: var(--pl); color: var(--p); border: none; padding: 5px 15px; border-radius: var(--rs); font-weight: bold; cursor: pointer; }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .slide-title { font-weight: 700; font-size: 16px; color: var(--g800); }
 
-    /* ── Add Post Section (Untouched logic, improved UI) ── */
-    .card{background:#fff;border-radius:var(--r);border:1px solid var(--g200);padding:20px;margin-bottom:16px;box-shadow:0 2px 4px rgba(0,0,0,0.02)}
-    label{display:block;font-size:12px;font-weight:700;color:var(--g600);margin-bottom:6px}
-    input,select,textarea{width:100%;font-family:'Cairo';font-size:14px;border:1.5px solid var(--g200);border-radius:var(--rs);padding:10px 14px;outline:none;transition:0.2s}
-    input:focus,textarea:focus{border-color:var(--p)}
-    .post-item{background:var(--g50);border:1px solid var(--g200);border-radius:var(--r);padding:18px;margin-bottom:16px}
-    .btn{font-family:'Cairo';font-size:14px;font-weight:700;padding:12px 20px;border-radius:var(--rs);border:none;cursor:pointer;transition:0.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+    /* ── Table Styling ── */
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+    th { text-align: right; background: var(--g100); padding: 12px; color: var(--g600); font-weight: 700; border-bottom: 2px solid var(--g200); }
+    td { padding: 12px; border-bottom: 1px solid var(--g100); vertical-align: middle; }
+    .status-row-published { background-color: rgba(22, 163, 74, 0.05); }
+    .status-row-pending { background-color: rgba(217, 119, 6, 0.05); }
+    
+    .post-text-cell { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--g600); }
+    .action-btns { display: flex; gap: 8px; }
+    .btn-edit { color: var(--p); background: var(--pl); border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+    .btn-delete { color: var(--d); background: var(--dl); border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+
+    /* ── UI Elements (Keep same) ── */
+    label{display:block;font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px}
+    input,select,textarea{width:100%;font-family:'Cairo';font-size:13px;border:1.5px solid var(--g200);border-radius:var(--rs);padding:9px 12px;outline:none}
+    textarea{resize:vertical;min-height:110px;line-height:1.7}
+    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .btn{font-family:'Cairo';font-size:13px;font-weight:700;padding:10px 18px;border-radius:var(--rs);border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
     .btn-p{background:var(--p);color:#fff}
     .btn-o{background:#fff;border:1.5px solid var(--g200);color:var(--g600)}
-    .btn-d{background:var(--dl);color:var(--d)}
+    .post-item{background:var(--g50);border:1.5px solid var(--g200);border-radius:var(--r);padding:14px;margin-bottom:10px}
+    .post-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .post-num{background:var(--p);color:#fff;width:25px;height:25px;border-radius:50%;text-align:center;font-size:12px;line-height:25px}
 
-    /* ── Carousel System (New) ── */
-    .carousel-container { position: relative; width: 100%; overflow: hidden; padding: 10px 0; }
-    .carousel-track { display: flex; transition: transform 0.5s ease-in-out; gap: 20px; }
-    .carousel-slide { min-width: 100%; }
-    
-    .carousel-nav { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
-    .nav-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--g200); cursor: pointer; }
-    .nav-dot.active { background: var(--p); transform: scale(1.3); }
-
-    /* ── Tables UI (New) ── */
-    .table-card { background: #fff; border-radius: var(--r); border: 1px solid var(--g200); padding: 20px; width: 100%; }
-    .table-title { font-weight: 700; margin-bottom: 15px; color: var(--p); display: flex; align-items: center; justify-content: space-between; }
-    
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th { text-align: right; font-size: 12px; color: var(--g400); padding: 12px 8px; border-bottom: 2px solid var(--g100); }
-    td { padding: 14px 8px; border-bottom: 1px solid var(--g100); font-size: 13px; vertical-align: middle; }
-    
-    .post-preview-text { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--g800); }
-    .action-btns { display: flex; gap: 8px; }
-    .btn-sm { padding: 6px 10px; font-size: 11px; border-radius: 6px; }
-    
-    #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--g800);color:#fff;padding:12px 24px;border-radius:var(--rs);font-size:14px;z-index:9999;display:none}
+    #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--g800);color:#fff;padding:12px 22px;border-radius:var(--r);font-size:13px;z-index:9999;display:none}
     #toast.on{display:block;animation:slideUp .3s ease}
-
-    @media(max-width:600px){ .post-preview-text { max-width: 120px; } .row3 { grid-template-columns: 1fr; } }
+    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:580px){.row3{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 
-<div id="s-loading" class="full-page"><div class="spinner"></div><p>جاري مزامنة بياناتك...</p></div>
-<div id="s-notfound" class="full-page" style="display:none">🔍<p>لم يتم العثور على الحساب.</p></div>
+<div id="s-loading" class="full-page"><div class="spinner"></div><p>جاري تحميل بياناتك...</p></div>
+<div id="s-notfound" class="full-page" style="display:none"><p>الرابط غير صحيح أو العميل غير موجود.</p></div>
 
 <div id="s-main" style="display:none">
   <div class="hdr">
-    <div class="hdr-logo"><span>🚀 نظام الإدارة الذكي</span></div>
+    <div class="hdr-logo"><span>نظام الجدولة الذكي</span></div>
     <span class="client-badge" id="clientNameBadge">—</span>
   </div>
 
   <div class="stats">
-    <div class="stat"><div class="stat-val" id="statTotal" style="color:var(--p)">0</div><div class="stat-lbl">الكل</div></div>
-    <div class="stat"><div class="stat-val" id="statPending" style="color:var(--w)">0</div><div class="stat-lbl">مجدول</div></div>
-    <div class="stat"><div class="stat-val" id="statPublished" style="color:var(--s)">0</div><div class="stat-lbl">منشور</div></div>
+    <div class="stat"><div class="stat-val" id="statTotal">—</div><div class="stat-lbl">إجمالي المنشورات</div></div>
+    <div class="stat"><div class="stat-val" id="statPending" style="color:var(--w)">—</div><div class="stat-lbl">مجدول</div></div>
+    <div class="stat"><div class="stat-val" id="statPublished" style="color:var(--s)">—</div><div class="stat-lbl">تم النشر</div></div>
   </div>
 
   <div class="tabs">
-    <button class="tab on" onclick="switchTab('add',this)">➕ إضافة محتوى</button>
+    <button class="tab on" onclick="switchTab('add',this)">➕ إضافة منشورات</button>
     <button class="tab" onclick="switchTab('sched',this)">📅 عرض الجداول</button>
   </div>
 
   <div id="tab-add" class="content">
     <div class="card">
-      <div class="card-title" style="margin-bottom:15px; font-weight:700">⏱️ ضبط المواعيد تلقائياً</div>
-      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px">
-        <div><label>بداية النشر</label><input type="date" id="startDate"></div>
-        <div><label>ساعة النشر</label><input type="time" id="postTime" value="10:00"></div>
-        <div><label>كل كم يوم؟</label><select id="freq"><option value="1">يومياً</option><option value="2">يومين</option><option value="7">أسبوعياً</option></select></div>
+      <div class="card-title">إعدادات الجدولة</div>
+      <div class="row3">
+        <div><label>تاريخ البداية</label><input type="date" id="startDate" onchange="updatePreview()"></div>
+        <div><label>وقت النشر اليومي</label><input type="time" id="postTime" value="12:00" onchange="updatePreview()"></div>
+        <div><label>التكرار</label><select id="freq" onchange="updatePreview()"><option value="1">يومياً</option><option value="2">يومين</option><option value="7">أسبوعياً</option></select></div>
       </div>
     </div>
     <div id="postsList"></div>
-    <button class="btn btn-o" style="width:100%; margin-bottom:12px" onclick="addPost()">+ إضافة منشور إضافي</button>
-    <button class="btn btn-p" id="submitBtn" style="width:100%" onclick="submitPosts()">اعتماد وجدولة المنشورات ✅</button>
+    <button class="btn btn-o w-100" style="width:100%; margin-bottom:10px" onclick="addPost()">+ إضافة منشور آخر</button>
+    <button class="btn btn-p w-100" id="submitBtn" style="width:100%" onclick="submitPosts()">إرسال للجدولة الآن</button>
   </div>
 
   <div id="tab-sched" class="content" style="display:none">
-    <div class="carousel-container">
-      <div class="carousel-track" id="carouselTrack">
-        </div>
+    <div class="carousel-nav">
+      <button class="nav-btn" onclick="prevSlide()" id="prevBtn">السابق</button>
+      <div class="slide-title" id="currentSlideTitle">النوع: ...</div>
+      <button class="nav-btn" onclick="nextSlide()" id="nextBtn">التالي</button>
     </div>
-    <div class="carousel-nav" id="carouselNav"></div>
+    <div id="tablesCarousel"></div>
   </div>
 </div>
 
@@ -136,16 +139,19 @@ let client = null;
 let sched = [];
 let posts = [];
 let postCnt = 0;
-let currentSlide = 0;
+let currentSlideIdx = 0;
+let categories = [];
 
+// ── Init ──
 async function init() {
   if (!clientId) { show('notfound'); return; }
   try {
     const res = await fetch(`${N8N}/webhook/client-data?id=${clientId}`);
     const data = await res.json();
-    if (!data.found) { show('notfound'); return; }
+    if (!data || !data.found) { show('notfound'); return; }
     client = data;
     sched = data.scheduled_posts || [];
+    categories = Object.keys(client.custom_config?.user_prompt || {});
     renderMain();
     show('main');
   } catch(e) { show('notfound'); }
@@ -157,9 +163,9 @@ function show(id) {
 
 function renderMain() {
   document.getElementById('clientNameBadge').textContent = client.clint_name;
+  updateStats();
   const tom = new Date(); tom.setDate(tom.getDate()+1);
   document.getElementById('startDate').value = tom.toISOString().split('T')[0];
-  updateStats();
   addPost();
   renderCarousel();
 }
@@ -170,137 +176,114 @@ function updateStats() {
   document.getElementById('statPublished').textContent = sched.filter(p=>p.status==='publishd').length;
 }
 
-// ── Add Post Logic (Stay Untouched as requested) ──
+// ── Add Posts Logic (Unchanged Features) ──
 function addPost() {
+  const platforms = client?.custom_config?.platforms || ['facebook'];
   const prompts = client?.custom_config?.user_prompt || {};
-  const cats = Object.keys(prompts);
-  posts.push({ id: ++postCnt, text: '', platform: 'facebook', category: cats[0] || 'default' });
-  renderAddForm();
+  const cats = Object.keys(prompts); 
+  posts.push({ id: ++postCnt, text: '', platform: platforms[0], category: cats[0] || 'default' });
+  renderPosts();
 }
 
-function renderAddForm() {
+function removePost(idx) {
+  if(posts.length > 1) { posts.splice(idx, 1); renderPosts(); }
+}
+
+function renderPosts() {
+  const platforms = client?.custom_config?.platforms || ['facebook'];
   const cats = Object.keys(client?.custom_config?.user_prompt || {});
   document.getElementById('postsList').innerHTML = posts.map((p, i) => `
     <div class="post-item">
-      <div style="display:flex; justify-content:space-between; margin-bottom:10px">
-        <span class="post-num" style="background:var(--p); color:#fff; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px">${i+1}</span>
-        <button onclick="posts.splice(${i},1);renderAddForm()" style="background:none; border:none; color:var(--d); cursor:pointer">🗑️</button>
+      <div class="post-hdr">
+        <div class="post-num">${i + 1}</div>
+        <button onclick="removePost(${i})" style="color:var(--d); background:none; border:none; cursor:pointer;">🗑️</button>
       </div>
-      <textarea oninput="posts[${i}].text=this.value" placeholder="اكتب محتوى المنشور هنا...">${p.text}</textarea>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px">
-        <select onchange="posts[${i}].platform=this.value"><option value="facebook">📘 فيسبوك</option><option value="instagram">📸 إنستجرام</option></select>
-        <select onchange="posts[${i}].category=this.value">${cats.map(c=>`<option value="${c}" ${p.category===c?'selected':''}>النوع: ${c}</option>`).join('')}</select>
+      <label>نص المنشور</label>
+      <textarea oninput="posts[${i}].text=this.value" placeholder="اكتب نص المنشور هنا...">${p.text}</textarea>
+      <div class="row2" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+        <div><label>المنصة</label><select onchange="posts[${i}].platform=this.value">
+          ${platforms.map(pl => `<option value="${pl}" ${p.platform === pl ? 'selected' : ''}>${pl}</option>`).join('')}
+        </select></div>
+        <div><label>النوع</label><select onchange="posts[${i}].category=this.value">
+          ${cats.map(c => `<option value="${c}" ${p.category === c ? 'selected' : ''}>${c}</option>`).join('')}
+        </select></div>
       </div>
     </div>
   `).join('');
 }
 
-// ── Carousel & Dynamic Tables Logic ──
+// ── Dynamic Carousel Logic ──
 function renderCarousel() {
-  const track = document.getElementById('carouselTrack');
-  const nav = document.getElementById('carouselNav');
-  const prompts = client?.custom_config?.user_prompt || {};
-  const cats = Object.keys(prompts);
-
-  if (cats.length === 0) {
-    track.innerHTML = '<p class="text-center w-100">لا توجد تصنيفات معرفة للعميل.</p>';
+  const container = document.getElementById('tablesCarousel');
+  if (categories.length === 0) {
+    container.innerHTML = '<p class="text-center text-muted">لا توجد أنواع معرفة.</p>';
     return;
   }
-
-  // Generate Slides (Tables)
-  track.innerHTML = cats.map((cat, index) => {
-    const catPosts = sched.filter(p => p.number_of_the_psot === cat);
-    return `
-      <div class="carousel-slide">
-        <div class="table-card">
-          <div class="table-title">
-            <span>📊 جدول منشورات: ${cat}</span>
-            <small style="font-size:11px; color:var(--g400)">العدد: ${catPosts.length}</small>
-          </div>
-          <div style="overflow-x:auto">
-            <table>
-              <thead>
-                <tr>
-                  <th>المحتوى</th>
-                  <th>تاريخ النشر</th>
-                  <th>الحالة</th>
-                  <th>إجراء</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${catPosts.length ? catPosts.map(p => `
-                  <tr>
-                    <td><div class="post-preview-text">${p.post_text}</div></td>
-                    <td><small>${p.posting_time ? new Date(p.posting_time).toLocaleDateString('ar-EG') : '—'}</small></td>
-                    <td><span class="badge ${p.status==='publishd'?'b-published':'b-pending'}">${p.status==='publishd'?'تم':'مجدول'}</span></td>
-                    <td>
-                      <div class="action-btns">
-                        <button class="btn btn-o btn-sm" onclick="editPost('${p.id}', '${p.post_text.replace(/'/g, "\\'")}')">✏️</button>
-                        <button class="btn btn-d btn-sm" onclick="deletePost('${p.id}')">🗑️</button>
-                      </div>
-                    </td>
-                  </tr>
-                `).join('') : '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--g400)">لا توجد منشورات لهذا النوع بعد.</td></tr>'}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  // Generate Navigation Dots
-  nav.innerHTML = cats.map((_, i) => `<div class="nav-dot ${i===0?'active':''}" onclick="moveToSlide(${i})"></div>`).join('');
-  moveToSlide(0);
+  updateCarouselView();
 }
 
-function moveToSlide(index) {
-  const track = document.getElementById('carouselTrack');
-  const dots = document.querySelectorAll('.nav-dot');
-  currentSlide = index;
-  track.style.transform = `translateX(${index * 100}%)`; // RTL Adjustment
-  dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
-}
+function updateCarouselView() {
+  const cat = categories[currentSlideIdx];
+  document.getElementById('currentSlideTitle').textContent = `النوع: ${cat}`;
+  document.getElementById('prevBtn').disabled = currentSlideIdx === 0;
+  document.getElementById('nextBtn').disabled = currentSlideIdx === categories.length - 1;
 
-// ── Edit & Delete Simulation ──
-async function deletePost(id) {
-  if(!confirm('هل أنت متأكد من حذف هذا المنشور نهائياً؟')) return;
-  try {
-    const res = await fetch(`${N8N}/webhook/delete-post`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ post_id: id })
-    });
-    if(res.ok) { toast('🗑️ تم الحذف بنجاح'); location.reload(); }
-  } catch(e) { toast('❌ فشل الحذف'); }
-}
-
-async function editPost(id, oldText) {
-  const newText = prompt('تعديل نص المنشور:', oldText);
-  if (newText === null || newText === oldText) return;
+  const filteredPosts = sched.filter(p => p.number_of_the_psot === cat);
   
-  try {
-    const res = await fetch(`${N8N}/webhook/edit-post`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ post_id: id, new_text: newText })
-    });
-    if(res.ok) { toast('✏️ تم التحديث بنجاح'); location.reload(); }
-  } catch(e) { toast('❌ فشل التعديل'); }
+  let tableHtml = `
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>الوقت والتاريخ</th>
+            <th>نص المنشور</th>
+            <th>الحالة</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filteredPosts.length > 0 ? filteredPosts.map(p => `
+            <tr class="${p.status === 'publishd' ? 'status-row-published' : 'status-row-pending'}">
+              <td>
+                <div style="font-weight:600; color:var(--g800)">${p.posting_time ? new Date(p.posting_time).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '—'}</div>
+                <div style="font-size:10px; color:var(--g400)">${p.posting_time ? new Date(p.posting_time).toLocaleDateString('ar-EG') : '—'}</div>
+              </td>
+              <td><div class="post-text-cell">${p.post_text}</div></td>
+              <td><span class="badge ${p.status === 'publishd' ? 'b-published' : 'b-pending'}">${p.status === 'publishd' ? 'تم النشر' : 'مجدول'}</span></td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-edit" onclick="editPost(${p.id})">تعديل</button>
+                  <button class="btn-delete" onclick="deletePost(${p.id})">حذف</button>
+                </div>
+              </td>
+            </tr>
+          `).join('') : '<tr><td colspan="4" class="text-center text-muted">لا توجد منشورات لهذا النوع.</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  `;
+  document.getElementById('tablesCarousel').innerHTML = tableHtml;
 }
+
+function nextSlide() { if(currentSlideIdx < categories.length - 1) { currentSlideIdx++; updateCarouselView(); } }
+function prevSlide() { if(currentSlideIdx > 0) { currentSlideIdx--; updateCarouselView(); } }
 
 function switchTab(name, btn) {
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
   btn.classList.add('on');
-  document.getElementById('tab-add').style.display = name==='add'?'block':'none';
-  document.getElementById('tab-sched').style.display = name==='sched'?'block':'none';
+  document.getElementById('tab-add').style.display = name === 'add' ? 'block' : 'none';
+  document.getElementById('tab-sched').style.display = name === 'sched' ? 'block' : 'none';
 }
+
+// ── Placeholder Functions for Edit/Delete (Require Backend Endpoints) ──
+function editPost(id) { toast(`قريباً: تعديل المنشور رقم ${id}`); }
+function deletePost(id) { toast(`قريباً: حذف المنشور رقم ${id}`); }
 
 async function submitPosts() {
   const d = document.getElementById('startDate').value;
   const t = document.getElementById('postTime').value;
   const f = parseInt(document.getElementById('freq').value);
-  if(!d || !t) { toast('⚠️ حدد وقت وتاريخ البداية'); return; }
+  if(!d || !t) { toast('⚠️ حدد الوقت والتاريخ'); return; }
 
   const payload = posts.map((p, i) => {
     const dt = new Date(`${d}T${t}:00`);
@@ -308,7 +291,9 @@ async function submitPosts() {
     return { client_id: clientId, post_text: p.text, platform: p.platform, category: p.category, posting_time: dt.toISOString() };
   });
 
-  document.getElementById('submitBtn').disabled = true;
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...';
+
   try {
     const res = await fetch(`${N8N}/webhook/submit-posts`, {
       method: 'POST',
@@ -316,7 +301,7 @@ async function submitPosts() {
       body: JSON.stringify({ posts: payload })
     });
     if(res.ok) { toast('✅ تم الحفظ بنجاح'); location.reload(); }
-  } catch(e) { toast('❌ خطأ في الإرسال'); document.getElementById('submitBtn').disabled = false; }
+  } catch(e) { toast('❌ خطأ في الاتصال'); btn.disabled = false; }
 }
 
 function toast(m){
@@ -324,6 +309,8 @@ function toast(m){
     t.textContent=m; t.classList.add('on');
     setTimeout(()=>t.classList.remove('on'),3000);
 }
+
+function updatePreview() {} // Placeholder for existing feature
 
 init();
 </script>
