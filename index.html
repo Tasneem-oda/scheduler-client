@@ -4,81 +4,207 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>نظام الجدولة الذكي | لوحة التحكم</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* ── التنسيقات الأساسية (تم الحفاظ عليها بالكامل) ── */
     *{margin:0;padding:0;box-sizing:border-box}
     :root{
-      --p:#4f46e5;--pl:#ede9fe;--pd:#3730a3;
+      --p:#4f46e5;--pl:#ede9fe;--pd:#3730a3;--pp:#6d64f0;
       --s:#16a34a;--sl:#dcfce7;
       --w:#d97706;--wl:#fef3c7;
       --d:#dc2626;--dl:#fee2e2;
       --g50:#f8fafc;--g100:#f1f5f9;--g200:#e2e8f0;
-      --g400:#94a3b8;--g600:#475569;--g800:#1e293b;
-      --r:12px;--rs:8px
+      --g300:#cbd5e1;--g400:#94a3b8;--g600:#475569;--g700:#334155;--g800:#1e293b;
+      --r:14px;--rs:9px;--shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05)
     }
     body{font-family:'Cairo',sans-serif;background:var(--g50);color:var(--g800);min-height:100vh}
-    .full-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
-    .spinner{width:48px;height:48px;border:3px solid var(--g200);border-top-color:var(--p);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
+
+    /* ── حالات التحميل والخطأ ── */
+    .full-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center;gap:14px}
+    .full-page h2{font-size:18px;color:var(--g800)}
+    .full-page p{font-size:14px;color:var(--g400)}
+    .spinner{width:44px;height:44px;border:3px solid var(--g200);border-top-color:var(--p);border-radius:50%;animation:spin .75s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .hdr{background:var(--p);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(79,70,229,.3)}
-    .hdr-logo span{font-size:15px;font-weight:700;color:#fff}
-    .client-badge{background:rgba(255,255,255,.2);color:#fff;padding:4px 14px;border-radius:999px;font-size:13px;font-weight:600}
+    .error-icon{font-size:48px}
+
+    /* ── الهيدر ── */
+    .hdr{background:linear-gradient(135deg,var(--p) 0%,var(--pd) 100%);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(79,70,229,.35)}
+    .hdr-logo{display:flex;align-items:center;gap:10px}
+    .hdr-logo span{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.3px}
+    .client-badge{background:rgba(255,255,255,.18);backdrop-filter:blur(4px);color:#fff;padding:5px 14px;border-radius:999px;font-size:13px;font-weight:700;border:1px solid rgba(255,255,255,.25)}
+
+    /* ── شريط تحذير الدفع ── */
+    .payment-banner{background:var(--wl);border-bottom:2px solid #fbbf24;padding:10px 20px;text-align:center;font-size:13px;font-weight:700;color:#92400e;display:none;gap:8px;align-items:center;justify-content:center}
+    .payment-banner.show{display:flex}
+
+    /* ── الإحصائيات ── */
     .stats{background:#fff;border-bottom:1px solid var(--g200);display:flex;overflow-x:auto}
-    .stat{padding:14px 20px;text-align:center;border-left:1px solid var(--g200);flex:1;min-width:100px}
+    .stat{padding:16px 20px;text-align:center;border-left:1px solid var(--g200);flex:1;min-width:110px;transition:background .2s}
     .stat:last-child{border-left:none}
-    .stat-val{font-size:22px;font-weight:700;line-height:1;margin-bottom:4px}
-    .stat-lbl{font-size:11px;color:var(--g400)}
-    .tabs{background:#fff;border-bottom:1px solid var(--g200);display:flex;padding:0 16px}
-    .tab{padding:13px 16px;border:none;background:none;font-family:'Cairo';font-size:13px;font-weight:600;color:var(--g400);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+    .stat-val{font-size:24px;font-weight:800;line-height:1;margin-bottom:5px}
+    .stat-lbl{font-size:11px;color:var(--g400);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+    /* ── التابات ── */
+    .tabs{background:#fff;border-bottom:1px solid var(--g200);display:flex;padding:0 16px;gap:4px}
+    .tab{padding:13px 18px;border:none;background:none;font-family:'Cairo';font-size:13px;font-weight:700;color:var(--g400);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:6px}
     .tab.on{color:var(--p);border-bottom-color:var(--p)}
-    .content{max-width:900px;margin:0 auto;padding:20px 14px}
-    .card{background:#fff;border-radius:var(--r);border:1px solid var(--g200);padding:18px;margin-bottom:14px}
-    .carousel-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; background: #fff; padding: 10px; border-radius: var(--r); border: 1px solid var(--g200); }
-    .nav-btn { background: var(--pl); color: var(--p); border: none; padding: 5px 15px; border-radius: var(--rs); font-weight: bold; cursor: pointer; }
-    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .slide-title { font-weight: 700; font-size: 16px; color: var(--g800); }
-    .table-container { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-    th { text-align: right; background: var(--g100); padding: 12px; color: var(--g600); font-weight: 700; border-bottom: 2px solid var(--g200); }
-    td { padding: 12px; border-bottom: 1px solid var(--g100); vertical-align: middle; }
-    .status-row-published { background-color: rgba(22, 163, 74, 0.05); }
-    .status-row-pending { background-color: rgba(217, 119, 6, 0.05); }
-    .post-text-cell { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--g600); }
-    .action-btns { display: flex; gap: 8px; }
-    .btn-edit { color: var(--p); background: var(--pl); border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-    .btn-delete { color: var(--d); background: var(--dl); border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-    label{display:block;font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px}
-    input,select,textarea{width:100%;font-family:'Cairo';font-size:13px;border:1.5px solid var(--g200);border-radius:var(--rs);padding:9px 12px;outline:none}
-    textarea{resize:vertical;min-height:110px;line-height:1.7}
-    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-    .btn{font-family:'Cairo';font-size:13px;font-weight:700;padding:10px 18px;border-radius:var(--rs);border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
-    .btn-p{background:var(--p);color:#fff}
-    .btn-o{background:#fff;border:1.5px solid var(--g200);color:var(--g600)}
-    .post-item{background:var(--g50);border:1.5px solid var(--g200);border-radius:var(--r);padding:14px;margin-bottom:10px}
-    .post-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-    .post-num{background:var(--p);color:#fff;width:25px;height:25px;border-radius:50%;text-align:center;font-size:12px;line-height:25px}
-    #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--g800);color:#fff;padding:12px 22px;border-radius:var(--r);font-size:13px;z-index:9999;display:none}
-    #toast.on{display:block;animation:slideUp .3s ease}
-    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-    @media(max-width:580px){.row3{grid-template-columns:1fr}}
+    .tab:hover:not(.on){color:var(--g700);background:var(--g50)}
+
+    /* ── المحتوى ── */
+    .content{max-width:920px;margin:0 auto;padding:20px 14px}
+
+    /* ── البطاقات ── */
+    .card{background:#fff;border-radius:var(--r);border:1px solid var(--g200);padding:20px;margin-bottom:14px;box-shadow:var(--shadow)}
+    .card-title{font-size:14px;font-weight:800;margin-bottom:16px;color:var(--g800);display:flex;align-items:center;gap:7px}
+
+    /* ── صندوق المعاينة ── */
+    .preview-box{background:var(--pl);border:1.5px solid #c4b5fd;border-radius:var(--rs);padding:11px 14px;margin-top:14px;font-size:12px;color:var(--pd);line-height:1.9;display:none}
+    .preview-box strong{font-weight:700}
+
+    /* ── الكاروسيل ── */
+    .carousel-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;background:#fff;padding:11px 14px;border-radius:var(--r);border:1px solid var(--g200);box-shadow:var(--shadow)}
+    .nav-btn{background:var(--pl);color:var(--p);border:none;padding:6px 16px;border-radius:var(--rs);font-weight:700;cursor:pointer;font-family:'Cairo';font-size:13px;transition:all .2s}
+    .nav-btn:hover:not(:disabled){background:var(--p);color:#fff}
+    .nav-btn:disabled{opacity:.3;cursor:not-allowed}
+    .slide-title{font-weight:800;font-size:15px;color:var(--g800);text-align:center}
+    .slide-counter{font-size:11px;color:var(--g400);font-weight:600;margin-top:2px;text-align:center}
+
+    /* ── الجدول ── */
+    .table-wrap{overflow-x:auto;border-radius:var(--rs)}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th{text-align:right;background:var(--g100);padding:11px 14px;color:var(--g600);font-weight:700;border-bottom:2px solid var(--g200);white-space:nowrap;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+    td{padding:12px 14px;border-bottom:1px solid var(--g100);vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    .row-published{background:rgba(22,163,74,.04)}
+    .row-pending{background:rgba(217,119,6,.03)}
+    .row-late{background:rgba(220,38,38,.04)}
+    .post-text-cell{max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--g600)}
+    .action-btns{display:flex;gap:6px;flex-wrap:wrap}
+    .btn-sm{padding:5px 10px;border-radius:6px;cursor:pointer;font-family:'Cairo';font-size:12px;font-weight:700;border:none;transition:all .2s}
+    .btn-sm:disabled{opacity:.5;cursor:not-allowed}
+    .btn-edit{color:var(--p);background:var(--pl)}
+    .btn-edit:hover:not(:disabled){background:var(--p);color:#fff}
+    .btn-delete{color:var(--d);background:var(--dl)}
+    .btn-delete:hover:not(:disabled){background:var(--d);color:#fff}
+
+    /* ── الشارات ── */
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
+    .b-published{background:var(--sl);color:var(--s)}
+    .b-pending{background:var(--wl);color:var(--w)}
+    .b-late{background:var(--dl);color:var(--d)}
+    .b-failed{background:var(--dl);color:var(--d)}
+
+    /* ── الفورم ── */
+    .field{margin-bottom:14px}
+    label{display:block;font-size:12px;font-weight:700;color:var(--g600);margin-bottom:5px;letter-spacing:.2px}
+    label .req{color:var(--d);margin-right:2px}
+    input,select,textarea{width:100%;font-family:'Cairo';font-size:13px;border:1.5px solid var(--g200);border-radius:var(--rs);padding:9px 12px;outline:none;transition:border-color .2s,box-shadow .2s;background:#fff;color:var(--g800)}
+    input:focus,select:focus,textarea:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+    input.err,textarea.err,select.err{border-color:var(--d);box-shadow:0 0 0 3px rgba(220,38,38,.1)}
+    .field-error{font-size:11px;color:var(--d);margin-top:4px;display:none;font-weight:600}
+    textarea{resize:vertical;min-height:115px;line-height:1.75}
+    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+    /* ── الأزرار الرئيسية ── */
+    .btn{font-family:'Cairo';font-size:13px;font-weight:700;padding:11px 20px;border-radius:var(--rs);border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;letter-spacing:.2px}
+    .btn-primary{background:var(--p);color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.35)}
+    .btn-primary:hover:not(:disabled){background:var(--pd);transform:translateY(-1px);box-shadow:0 4px 12px rgba(79,70,229,.4)}
+    .btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .btn-secondary{background:#fff;border:1.5px solid var(--g200);color:var(--g600)}
+    .btn-secondary:hover{background:var(--g50);border-color:var(--g300)}
+    .btn-danger{background:var(--d);color:#fff}
+    .btn-danger:hover:not(:disabled){background:#b91c1c}
+    .btn-danger:disabled{opacity:.6;cursor:not-allowed}
+
+    /* ── بطاقة المنشور ── */
+    .post-item{background:var(--g50);border:1.5px solid var(--g200);border-radius:var(--r);padding:16px;margin-bottom:12px;transition:border-color .2s}
+    .post-item:focus-within{border-color:var(--pp)}
+    .post-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .post-meta{display:flex;align-items:center;gap:10px}
+    .post-num{background:var(--p);color:#fff;width:26px;height:26px;border-radius:50%;text-align:center;font-size:12px;line-height:26px;font-weight:700;flex-shrink:0}
+    .post-date-preview{font-size:11px;color:var(--g400);font-weight:600;background:var(--g100);padding:3px 9px;border-radius:999px}
+    .remove-btn{color:var(--g400);background:none;border:none;cursor:pointer;font-size:18px;padding:2px;transition:color .2s}
+    .remove-btn:hover{color:var(--d)}
+
+    /* ── الحالة الفارغة ── */
+    .empty-state{padding:48px 20px;text-align:center;color:var(--g400)}
+    .empty-state-icon{font-size:40px;margin-bottom:12px;opacity:.5}
+    .empty-state p{font-size:13px;font-weight:600}
+
+    /* ── المودال ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(3px);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
+    .modal-overlay.open{display:flex;animation:fadeIn .2s ease}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .modal{background:#fff;border-radius:calc(var(--r) + 2px);padding:26px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,.2);animation:slideUp .25s ease}
+    @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+    .modal-title{font-size:16px;font-weight:800;color:var(--g800)}
+    .modal-close{background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--g600);transition:all .2s}
+    .modal-close:hover{background:var(--g200)}
+    .modal-footer{display:flex;gap:10px;margin-top:20px}
+
+    /* ── التوست ── */
+    #toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);padding:12px 22px;border-radius:var(--r);font-size:13px;font-weight:700;z-index:9999;display:none;font-family:'Cairo';min-width:220px;text-align:center;box-shadow:0 8px 20px rgba(0,0,0,.2)}
+    #toast.show{display:block;animation:toastIn .3s ease}
+    @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(14px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+    #toast.t-success{background:#16a34a;color:#fff}
+    #toast.t-error{background:var(--d);color:#fff}
+    #toast.t-warn{background:var(--w);color:#fff}
+
+    @media(max-width:580px){
+      .row3{grid-template-columns:1fr}
+      .row2{grid-template-columns:1fr}
+      .modal{padding:18px}
+      .hdr-logo span{font-size:13px}
+    }
   </style>
 </head>
 <body>
 
-<div id="s-loading" class="full-page"><div class="spinner"></div><p>جاري تحميل بياناتك...</p></div>
-<div id="s-notfound" class="full-page" style="display:none"><p>الرابط غير صحيح أو العميل غير موجود.</p></div>
+<!-- ── حالة التحميل ── -->
+<div id="s-loading" class="full-page">
+  <div class="spinner"></div>
+  <p>جاري تحميل بياناتك...</p>
+</div>
 
+<!-- ── حالة الخطأ ── -->
+<div id="s-notfound" class="full-page" style="display:none">
+  <div class="error-icon">⚠️</div>
+  <h2>الرابط غير صحيح</h2>
+  <p>العميل غير موجود أو الرابط المستخدم غير صحيح. يرجى التواصل مع الدعم.</p>
+</div>
+
+<!-- ── التطبيق الرئيسي ── -->
 <div id="s-main" style="display:none">
+
   <div class="hdr">
-    <div class="hdr-logo"><span>نظام الجدولة الذكي</span></div>
+    <div class="hdr-logo">
+      <span>🗓 نظام الجدولة الذكي</span>
+    </div>
     <span class="client-badge" id="clientNameBadge">—</span>
   </div>
 
+  <div class="payment-banner" id="paymentBanner">
+    ⚠️ الاشتراك غير مفعّل — يرجى التواصل مع الدعم لتفعيل خدمتك
+  </div>
+
   <div class="stats">
-    <div class="stat"><div class="stat-val" id="statTotal">—</div><div class="stat-lbl">إجمالي المنشورات</div></div>
-    <div class="stat"><div class="stat-val" id="statPending" style="color:var(--w)">—</div><div class="stat-lbl">مجدول</div></div>
-    <div class="stat"><div class="stat-val" id="statPublished" style="color:var(--s)">—</div><div class="stat-lbl">تم النشر</div></div>
+    <div class="stat">
+      <div class="stat-val" id="statTotal" style="color:var(--p)">—</div>
+      <div class="stat-lbl">إجمالي</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="statPending" style="color:var(--w)">—</div>
+      <div class="stat-lbl">مجدول</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="statPublished" style="color:var(--s)">—</div>
+      <div class="stat-lbl">تم النشر</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="statLate" style="color:var(--d)">—</div>
+      <div class="stat-lbl">متأخر</div>
+    </div>
   </div>
 
   <div class="tabs">
@@ -86,33 +212,105 @@
     <button class="tab" onclick="switchTab('sched',this)">📅 عرض الجداول</button>
   </div>
 
+  <!-- ────── تاب الإضافة ────── -->
   <div id="tab-add" class="content">
     <div class="card">
-      <div class="card-title">إعدادات الجدولة</div>
+      <div class="card-title">⚙️ إعدادات الجدولة</div>
       <div class="row3">
-        <div><label>تاريخ البداية</label><input type="date" id="startDate" onchange="updatePreview()"></div>
-        <div><label>وقت النشر اليومي</label><input type="time" id="postTime" value="12:00" onchange="updatePreview()"></div>
-        <div><label>التكرار</label><select id="freq" onchange="updatePreview()"><option value="1">يومياً</option><option value="2">يومين</option><option value="7">أسبوعياً</option></select></div>
+        <div class="field">
+          <label>تاريخ البداية <span class="req">*</span></label>
+          <input type="date" id="startDate" onchange="onSettingsChange()">
+          <div class="field-error" id="errDate">يجب اختيار تاريخ في المستقبل</div>
+        </div>
+        <div class="field">
+          <label>وقت النشر <span class="req">*</span></label>
+          <input type="time" id="postTime" value="12:00" onchange="onSettingsChange()">
+        </div>
+        <div class="field">
+          <label>التكرار بين المنشورات</label>
+          <select id="freq" onchange="onSettingsChange()">
+            <option value="1">كل يوم</option>
+            <option value="2">كل يومين</option>
+            <option value="3">كل 3 أيام</option>
+            <option value="7">أسبوعياً</option>
+            <option value="14">كل أسبوعين</option>
+          </select>
+        </div>
       </div>
+      <div class="preview-box" id="previewBox"></div>
     </div>
+
     <div id="postsList"></div>
-    <button class="btn btn-o w-100" style="width:100%; margin-bottom:10px" onclick="addPost()">+ إضافة منشور آخر</button>
-    <button class="btn btn-p w-100" id="submitBtn" style="width:100%" onclick="submitPosts()">إرسال للجدولة الآن</button>
+
+    <button class="btn btn-secondary" style="width:100%;margin-bottom:10px" onclick="addPost()">＋ إضافة منشور آخر</button>
+    <button class="btn btn-primary" id="submitBtn" style="width:100%" onclick="submitPosts()">🚀 إرسال للجدولة الآن</button>
   </div>
 
+  <!-- ────── تاب الجداول ────── -->
   <div id="tab-sched" class="content" style="display:none">
-    <div class="carousel-nav">
-      <button class="nav-btn" onclick="prevSlide()" id="prevBtn">السابق</button>
-      <div class="slide-title" id="currentSlideTitle">النوع: ...</div>
-      <button class="nav-btn" onclick="nextSlide()" id="nextBtn">التالي</button>
+    <div class="carousel-nav" id="carouselNav" style="display:none">
+      <button class="nav-btn" onclick="prevSlide()" id="prevBtn" disabled>◀ السابق</button>
+      <div>
+        <div class="slide-title" id="slideTitle">...</div>
+        <div class="slide-counter" id="slideCounter"></div>
+      </div>
+      <button class="nav-btn" onclick="nextSlide()" id="nextBtn">التالي ▶</button>
     </div>
-    <div id="tablesCarousel"></div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div id="tablesCarousel"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════ مودال التعديل ════ -->
+<div class="modal-overlay" id="editModal" onclick="handleOverlayClick(event,'editModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✏️ تعديل المنشور</div>
+      <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+    </div>
+    <input type="hidden" id="editId">
+    <input type="hidden" id="editCategory">
+    <div class="field">
+      <label>نص المنشور <span class="req">*</span></label>
+      <textarea id="editText" placeholder="نص المنشور..." oninput="clearErr(this,'errEditText')"></textarea>
+      <div class="field-error" id="errEditText">نص المنشور مطلوب</div>
+    </div>
+    <div class="field">
+      <label>وقت النشر <span class="req">*</span></label>
+      <input type="datetime-local" id="editTime" onchange="clearErr(this,'errEditTime')">
+      <div class="field-error" id="errEditTime">يجب اختيار وقت في المستقبل</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveEdit()" id="saveEditBtn">💾 حفظ التعديل</button>
+      <button class="btn btn-secondary" onclick="closeModal('editModal')">إلغاء</button>
+    </div>
   </div>
 </div>
 
+<!-- ════ مودال الحذف ════ -->
+<div class="modal-overlay" id="deleteModal" onclick="handleOverlayClick(event,'deleteModal')">
+  <div class="modal" style="max-width:400px;text-align:center">
+    <div style="font-size:52px;margin-bottom:12px">🗑️</div>
+    <div class="modal-title" style="justify-content:center;margin-bottom:10px">تأكيد الحذف</div>
+    <p style="color:var(--g600);font-size:13px;line-height:1.8;margin-bottom:6px">هل أنت متأكد من حذف هذا المنشور نهائياً؟</p>
+    <p style="color:var(--d);font-size:12px;font-weight:700;margin-bottom:24px">⚠️ لا يمكن التراجع عن هذا الإجراء</p>
+    <input type="hidden" id="deleteId">
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn btn-danger" onclick="confirmDelete()" id="confirmDeleteBtn">نعم، احذف</button>
+      <button class="btn btn-secondary" onclick="closeModal('deleteModal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── التوست ── -->
 <div id="toast"></div>
 
 <script>
+/* ═══════════════════════════════════════════════
+   الإعدادات والمتغيرات
+═══════════════════════════════════════════════ */
 const N8N = 'https://tasneemahmed-n8n-test.hf.space';
 const params = new URLSearchParams(location.search);
 const clientId = params.get('id');
@@ -121,220 +319,604 @@ let client = null;
 let sched = [];
 let posts = [];
 let postCnt = 0;
-let currentSlideIdx = 0;
+let currentSlide = 0;
 let categories = [];
 
-// ── تهيئة البيانات ──
+/* ═══════════════════════════════════════════════
+   التهيئة والتحميل
+═══════════════════════════════════════════════ */
 async function init() {
   if (!clientId) { show('notfound'); return; }
+
+  // التحقق من صيغة UUID قبل إرسال أي طلب
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_RE.test(clientId)) { show('notfound'); return; }
+
   try {
-    const res = await fetch(`${N8N}/webhook/client-data?id=${clientId}`);
+    const res = await fetch(`${N8N}/webhook/client-data?id=${encodeURIComponent(clientId)}`);
+    if (res.status === 404) { show('notfound'); return; }
     const data = await res.json();
-    if (!data || !data.found) { show('notfound'); return; }
+    if (!data?.found) { show('notfound'); return; }
+
     client = data;
-    sched = data.scheduled_posts || [];
+    sched = Array.isArray(data.scheduled_posts) ? data.scheduled_posts : [];
     categories = Object.keys(client.custom_config?.user_prompt || {});
+
     renderMain();
     show('main');
-  } catch(e) { show('notfound'); }
+  } catch (e) {
+    console.error('Init error:', e);
+    show('notfound');
+  }
 }
 
 function show(id) {
-  ['loading','notfound','main'].forEach(s=> {
-      const el = document.getElementById('s-'+s);
-      if(el) el.style.display = (s===id?'block':'none');
+  ['loading', 'notfound', 'main'].forEach(s => {
+    const el = document.getElementById('s-' + s);
+    if (el) el.style.display = s === id ? 'block' : 'none';
   });
 }
 
 function renderMain() {
-  document.getElementById('clientNameBadge').textContent = client.clint_name;
+  document.getElementById('clientNameBadge').textContent = client.clint_name || 'عميل';
+
+  // تحذير الدفع
+  if (!client.payment_status) {
+    document.getElementById('paymentBanner').classList.add('show');
+  }
+
   updateStats();
-  const tom = new Date(); tom.setDate(tom.getDate()+1);
-  document.getElementById('startDate').value = tom.toISOString().split('T')[0];
+
+  // تعيين الحد الأدنى للتاريخ = الغد
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minDate = tomorrow.toISOString().split('T')[0];
+  const dateInput = document.getElementById('startDate');
+  dateInput.min = minDate;
+  dateInput.value = minDate;
+
   addPost();
   renderCarousel();
 }
 
+/* ═══════════════════════════════════════════════
+   الإحصائيات
+═══════════════════════════════════════════════ */
 function updateStats() {
-  document.getElementById('statTotal').textContent = sched.length;
-  document.getElementById('statPending').textContent = sched.filter(p=>p.status!=='publishd').length;
-  document.getElementById('statPublished').textContent = sched.filter(p=>p.status==='publishd').length;
+  const now = new Date();
+  const total = sched.length;
+  const published = sched.filter(p => isPublished(p.status)).length;
+  const late = sched.filter(p => !isPublished(p.status) && p.posting_time && new Date(p.posting_time) < now).length;
+  const pending = total - published - late;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statPublished').textContent = published;
+  document.getElementById('statLate').textContent = late;
 }
 
-// ── منطق إضافة منشورات جديدة ──
+/* ═══════════════════════════════════════════════
+   دوال المساعدة للحالات
+═══════════════════════════════════════════════ */
+function isPublished(status) {
+  // معالجة الخطأ الإملائي 'publishd' + الصيغة الصحيحة
+  return status === 'published' || status === 'publishd';
+}
+
+function getStatusInfo(p) {
+  const now = new Date();
+  const dt = p.posting_time ? new Date(p.posting_time) : null;
+  if (isPublished(p.status)) return { label: '✅ تم النشر', cls: 'b-published', rowCls: 'row-published' };
+  if (p.status === 'failed') return { label: '❌ فشل النشر', cls: 'b-failed', rowCls: 'row-late' };
+  if (dt && dt < now) return { label: '⚠️ متأخر', cls: 'b-late', rowCls: 'row-late' };
+  return { label: '🕐 مجدول', cls: 'b-pending', rowCls: 'row-pending' };
+}
+
+/* ═══════════════════════════════════════════════
+   إضافة وإدارة المنشورات (نموذج الإضافة)
+═══════════════════════════════════════════════ */
 function addPost() {
   const platforms = client?.custom_config?.platforms || ['facebook'];
-  const prompts = client?.custom_config?.user_prompt || {};
-  const cats = Object.keys(prompts); 
-  posts.push({ id: ++postCnt, text: '', platform: platforms[0], category: cats[0] || 'default' });
+  const cats = Object.keys(client?.custom_config?.user_prompt || {});
+  posts.push({ id: ++postCnt, text: '', platform: platforms[0], category: cats[0] || 'general' });
   renderPosts();
+  updatePreview();
 }
 
 function removePost(idx) {
-  if(posts.length > 1) { posts.splice(idx, 1); renderPosts(); }
+  if (posts.length <= 1) {
+    toast('يجب أن يكون هناك منشور واحد على الأقل', 'warn');
+    return;
+  }
+  posts.splice(idx, 1);
+  renderPosts();
+  updatePreview();
 }
 
 function renderPosts() {
   const platforms = client?.custom_config?.platforms || ['facebook'];
   const cats = Object.keys(client?.custom_config?.user_prompt || {});
-  document.getElementById('postsList').innerHTML = posts.map((p, i) => `
-    <div class="post-item">
-      <div class="post-hdr"><div class="post-num">${i + 1}</div><button onclick="removePost(${i})" style="color:var(--d); background:none; border:none; cursor:pointer;">🗑️</button></div>
-      <label>نص المنشور</label>
-      <textarea oninput="posts[${i}].text=this.value" placeholder="اكتب نص المنشور هنا...">${p.text}</textarea>
-      <div class="row2" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-        <div><label>المنصة</label><select onchange="posts[${i}].platform=this.value">
-          ${platforms.map(pl => `<option value="${pl}" ${p.platform === pl ? 'selected' : ''}>${pl}</option>`).join('')}
-        </select></div>
-        <div><label>النوع</label><select onchange="posts[${i}].category=this.value">
-          ${cats.map(c => `<option value="${c}" ${p.category === c ? 'selected' : ''}>${c}</option>`).join('')}
-        </select></div>
+
+  document.getElementById('postsList').innerHTML = posts.map((p, i) => {
+    const dt = calcPostDate(i);
+    const dtLabel = dt ? formatDate(dt) : '';
+    return `
+      <div class="post-item">
+        <div class="post-hdr">
+          <div class="post-meta">
+            <div class="post-num">${i + 1}</div>
+            ${dtLabel ? `<span class="post-date-preview">📅 ${dtLabel}</span>` : ''}
+          </div>
+          <button class="remove-btn" onclick="removePost(${i})" title="حذف المنشور">🗑️</button>
+        </div>
+        <div class="field">
+          <label>نص المنشور <span class="req">*</span></label>
+          <textarea
+            id="pt-${i}"
+            oninput="posts[${i}].text=this.value;clearErr(this,'pe-${i}')"
+            placeholder="اكتب نص المنشور هنا..."
+          >${escHtml(p.text)}</textarea>
+          <div class="field-error" id="pe-${i}">نص المنشور مطلوب ولا يمكن أن يكون فارغاً</div>
+        </div>
+        <div class="row2" style="margin-top:10px">
+          <div class="field" style="margin-bottom:0">
+            <label>المنصة</label>
+            <select onchange="posts[${i}].platform=this.value">
+              ${platforms.map(pl => `<option value="${pl}" ${p.platform===pl?'selected':''}>${platformLabel(pl)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>الفئة / النوع</label>
+            <select onchange="posts[${i}].category=this.value">
+              ${cats.map(c => `<option value="${c}" ${p.category===c?'selected':''}>${c}</option>`).join('')}
+            </select>
+          </div>
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
-// ── منطق الجداول المتحركة (Carousel) ──
+function platformLabel(pl) {
+  const m = { facebook:'📘 Facebook', instagram:'📸 Instagram', twitter:'🐦 Twitter', x:'🐦 X', linkedin:'💼 LinkedIn', tiktok:'🎵 TikTok' };
+  return m[pl?.toLowerCase()] || pl;
+}
+
+/* ═══════════════════════════════════════════════
+   حساب التواريخ والمعاينة
+═══════════════════════════════════════════════ */
+function calcPostDate(idx) {
+  const d = document.getElementById('startDate')?.value;
+  const t = document.getElementById('postTime')?.value || '12:00';
+  const f = parseInt(document.getElementById('freq')?.value || '1');
+  if (!d) return null;
+  const dt = new Date(`${d}T${t}:00`);
+  if (isNaN(dt)) return null;
+  dt.setDate(dt.getDate() + idx * f);
+  return dt;
+}
+
+function formatDate(dt) {
+  return dt.toLocaleDateString('ar-EG', { weekday:'short', year:'numeric', month:'short', day:'numeric' })
+    + ' — ' + dt.toLocaleTimeString('ar-EG', { hour:'2-digit', minute:'2-digit' });
+}
+
+function onSettingsChange() {
+  // تحقق من التاريخ فور تغييره
+  const d = document.getElementById('startDate').value;
+  const t = document.getElementById('postTime').value || '12:00';
+  const errEl = document.getElementById('errDate');
+  const dateInput = document.getElementById('startDate');
+
+  if (d && t) {
+    const dt = new Date(`${d}T${t}:00`);
+    const now = new Date();
+    if (dt <= now) {
+      dateInput.classList.add('err');
+      errEl.style.display = 'block';
+    } else {
+      dateInput.classList.remove('err');
+      errEl.style.display = 'none';
+    }
+  }
+
+  renderPosts();   // تحديث معاينة التواريخ في المنشورات
+  updatePreview(); // تحديث صندوق الملخص
+}
+
+function updatePreview() {
+  const box = document.getElementById('previewBox');
+  const d = document.getElementById('startDate')?.value;
+  const t = document.getElementById('postTime')?.value || '12:00';
+
+  if (!d) { box.style.display = 'none'; return; }
+
+  const startDt = new Date(`${d}T${t}:00`);
+  const now = new Date();
+  if (isNaN(startDt) || startDt <= now) { box.style.display = 'none'; return; }
+
+  const freq = parseInt(document.getElementById('freq').value);
+  const freqLabels = { 1:'يومياً', 2:'كل يومين', 3:'كل 3 أيام', 7:'أسبوعياً', 14:'كل أسبوعين' };
+  const freqLabel = freqLabels[freq] || `كل ${freq} أيام`;
+  const lastDt = calcPostDate(posts.length - 1);
+
+  box.style.display = 'block';
+  box.innerHTML = `
+    📋 <strong>${posts.length}</strong> منشور سيُجدَّل |
+    أول نشر: <strong>${formatDate(startDt)}</strong> |
+    آخر نشر: <strong>${formatDate(lastDt)}</strong> |
+    التكرار: <strong>${freqLabel}</strong>
+  `;
+}
+
+/* ═══════════════════════════════════════════════
+   إرسال المنشورات (Create)
+═══════════════════════════════════════════════ */
+async function submitPosts() {
+  if (!validateForm()) return;
+
+  const d = document.getElementById('startDate').value;
+  const t = document.getElementById('postTime').value;
+  const f = parseInt(document.getElementById('freq').value);
+
+  const payload = posts.map((p, i) => {
+    const dt = calcPostDate(i);
+    return {
+      client_id: clientId,
+      workflow_id: client.workflow_id || null,
+      post_text: p.text.trim(),
+      platform: p.platform,
+      category: p.category,
+      posting_time: dt.toISOString()
+    };
+  });
+
+  const btn = document.getElementById('submitBtn');
+  setLoading(btn, true, '⏳ جاري الحفظ...');
+
+  try {
+    const res = await fetch(`${N8N}/webhook/submit-posts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create', posts: payload })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    toast('✅ تم حفظ المنشورات بنجاح', 'success');
+    posts = [];
+    postCnt = 0;
+    addPost();
+    await refreshData();
+  } catch (e) {
+    console.error('Submit error:', e);
+    toast('❌ خطأ في الإرسال — يرجى المحاولة مرة أخرى', 'error');
+  } finally {
+    setLoading(btn, false, '🚀 إرسال للجدولة الآن');
+  }
+}
+
+function validateForm() {
+  let ok = true;
+
+  // التحقق من التاريخ
+  const d = document.getElementById('startDate').value;
+  const t = document.getElementById('postTime').value;
+  const errDate = document.getElementById('errDate');
+  const dateInput = document.getElementById('startDate');
+
+  if (!d || !t) {
+    toast('⚠️ حدد تاريخ ووقت البداية أولاً', 'warn');
+    return false;
+  }
+
+  const startDt = new Date(`${d}T${t}:00`);
+  if (startDt <= new Date()) {
+    dateInput.classList.add('err');
+    errDate.style.display = 'block';
+    toast('⚠️ يجب أن يكون تاريخ البداية في المستقبل', 'warn');
+    return false;
+  }
+
+  // التحقق من نصوص المنشورات
+  posts.forEach((p, i) => {
+    if (!p.text.trim()) {
+      const ta = document.getElementById(`pt-${i}`);
+      const er = document.getElementById(`pe-${i}`);
+      if (ta) ta.classList.add('err');
+      if (er) er.style.display = 'block';
+      ok = false;
+    }
+  });
+
+  if (!ok) toast('⚠️ يرجى تعبئة نص جميع المنشورات', 'warn');
+  return ok;
+}
+
+/* ═══════════════════════════════════════════════
+   تحديث البيانات (بدون إعادة تحميل الصفحة)
+═══════════════════════════════════════════════ */
+async function refreshData() {
+  try {
+    const res = await fetch(`${N8N}/webhook/client-data?id=${encodeURIComponent(clientId)}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data?.found) {
+      sched = Array.isArray(data.scheduled_posts) ? data.scheduled_posts : [];
+      updateStats();
+      renderCarousel();
+    }
+  } catch (e) {
+    console.error('Refresh error:', e);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   الكاروسيل / عرض الجداول
+═══════════════════════════════════════════════ */
 function renderCarousel() {
-  const container = document.getElementById('tablesCarousel');
+  const nav = document.getElementById('carouselNav');
+
   if (categories.length === 0) {
-    container.innerHTML = '<p class="text-center text-muted">لا توجد أنواع معرفة.</p>';
+    document.getElementById('tablesCarousel').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <p>لا توجد فئات معرفة في إعدادات العميل.</p>
+      </div>`;
+    nav.style.display = 'none';
     return;
   }
+
+  if (currentSlide >= categories.length) currentSlide = 0;
+  nav.style.display = 'flex';
   updateCarouselView();
 }
 
 function updateCarouselView() {
-  const cat = categories[currentSlideIdx];
-  document.getElementById('currentSlideTitle').textContent = `النوع: ${cat}`;
-  document.getElementById('prevBtn').disabled = currentSlideIdx === 0;
-  document.getElementById('nextBtn').disabled = currentSlideIdx === categories.length - 1;
+  const cat = categories[currentSlide];
+  const now = new Date();
 
-  // الفلترة بناءً على العمود number_of_the_psot القادم من الداتابيز
-  const filteredPosts = sched.filter(p => p.number_of_the_psot === cat);
-  
-  let tableHtml = `
-    <div class="table-container">
+  document.getElementById('slideTitle').textContent = `النوع: ${cat}`;
+  document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${categories.length}`;
+  document.getElementById('prevBtn').disabled = currentSlide === 0;
+  document.getElementById('nextBtn').disabled = currentSlide === categories.length - 1;
+
+  const filtered = sched.filter(p => p.number_of_the_psot === cat)
+    .sort((a, b) => new Date(a.posting_time) - new Date(b.posting_time));
+
+  if (filtered.length === 0) {
+    document.getElementById('tablesCarousel').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <p>لا توجد منشورات لهذه الفئة بعد.</p>
+      </div>`;
+    return;
+  }
+
+  const rows = filtered.map(p => {
+    const dt = p.posting_time ? new Date(p.posting_time) : null;
+    const info = getStatusInfo(p);
+    const canEdit = !isPublished(p.status);
+    const postingIso = p.posting_time || '';
+
+    return `
+      <tr class="${info.rowCls}">
+        <td style="white-space:nowrap">
+          <div style="font-weight:700;color:var(--g800);font-size:13px">
+            ${dt ? dt.toLocaleDateString('ar-EG', {year:'numeric', month:'short', day:'numeric'}) : '—'}
+          </div>
+          <div style="font-size:11px;color:var(--g400);margin-top:2px">
+            ${dt ? dt.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '—'}
+          </div>
+        </td>
+        <td>
+          <div class="post-text-cell" title="${escAttr(p.post_text)}">${escHtml(p.post_text) || '<em style="color:var(--g400)">فارغ</em>'}</div>
+        </td>
+        <td><span class="badge ${info.cls}">${info.label}</span></td>
+        <td>
+          <div class="action-btns">
+            ${canEdit ? `
+              <button class="btn-sm btn-edit"
+                onclick="openEdit(${p.id},'${escJs(p.post_text)}','${postingIso}','${escJs(p.number_of_the_psot || '')}')">
+                تعديل
+              </button>
+              <button class="btn-sm btn-delete" onclick="openDelete(${p.id})">
+                حذف
+              </button>
+            ` : '<span style="font-size:11px;color:var(--g400)">—</span>'}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  document.getElementById('tablesCarousel').innerHTML = `
+    <div class="table-wrap">
       <table>
-        <thead><tr><th>الوقت والتاريخ</th><th>نص المنشور</th><th>الحالة</th><th>إجراءات</th></tr></thead>
-        <tbody>
-          ${filteredPosts.length > 0 ? filteredPosts.map(p => `
-            <tr class="${p.status === 'publishd' ? 'status-row-published' : 'status-row-pending'}">
-              <td>
-                <div style="font-weight:600; color:var(--g800)">${p.posting_time ? new Date(p.posting_time).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : '—'}</div>
-                <div style="font-size:10px; color:var(--g400)">${p.posting_time ? new Date(p.posting_time).toLocaleDateString('ar-EG') : '—'}</div>
-              </td>
-              <td><div class="post-text-cell">${p.post_text}</div></td>
-              <td><span class="badge ${p.status === 'publishd' ? 'b-published' : 'b-pending'}">${p.status === 'publishd' ? 'تم النشر' : 'مجدول'}</span></td>
-              <td>
-                <div class="action-btns">
-                  <button class="btn-edit" onclick="editPost(${p.id})">تعديل</button>
-                  <button class="btn-delete" onclick="deletePost(${p.id})">حذف</button>
-                </div>
-              </td>
-            </tr>
-          `).join('') : '<tr><td colspan="4" class="text-center text-muted">لا توجد منشورات لهذا النوع.</td></tr>'}
-        </tbody>
+        <thead>
+          <tr>
+            <th>التاريخ والوقت</th>
+            <th>نص المنشور</th>
+            <th>الحالة</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
       </table>
     </div>
   `;
-  document.getElementById('tablesCarousel').innerHTML = tableHtml;
 }
 
-function nextSlide() { if(currentSlideIdx < categories.length - 1) { currentSlideIdx++; updateCarouselView(); } }
-function prevSlide() { if(currentSlideIdx > 0) { currentSlideIdx--; updateCarouselView(); } }
+function prevSlide() { if (currentSlide > 0) { currentSlide--; updateCarouselView(); } }
+function nextSlide() { if (currentSlide < categories.length - 1) { currentSlide++; updateCarouselView(); } }
 
+/* ═══════════════════════════════════════════════
+   مودال التعديل
+═══════════════════════════════════════════════ */
+function openEdit(id, text, postingIso, category) {
+  document.getElementById('editId').value = id;
+  document.getElementById('editCategory').value = category;
+  document.getElementById('editText').value = text;
+  document.getElementById('editText').classList.remove('err');
+  document.getElementById('errEditText').style.display = 'none';
+  document.getElementById('errEditTime').style.display = 'none';
+
+  // تحويل ISO → datetime-local
+  if (postingIso) {
+    const dtObj = new Date(postingIso);
+    const local = new Date(dtObj.getTime() - dtObj.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('editTime').value = local;
+  } else {
+    document.getElementById('editTime').value = '';
+  }
+
+  // تعيين الحد الأدنى = الآن
+  const nowLocal = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  document.getElementById('editTime').min = nowLocal;
+
+  openModal('editModal');
+}
+
+async function saveEdit() {
+  const id = parseInt(document.getElementById('editId').value);
+  const category = document.getElementById('editCategory').value;
+  const text = document.getElementById('editText').value.trim();
+  const timeVal = document.getElementById('editTime').value;
+
+  let ok = true;
+
+  if (!text) {
+    document.getElementById('editText').classList.add('err');
+    document.getElementById('errEditText').style.display = 'block';
+    ok = false;
+  }
+
+  if (!timeVal || new Date(timeVal) <= new Date()) {
+    document.getElementById('errEditTime').style.display = 'block';
+    ok = false;
+  }
+
+  if (!ok) return;
+
+  const btn = document.getElementById('saveEditBtn');
+  setLoading(btn, true, '⏳ جاري الحفظ...');
+
+  try {
+    const res = await fetch(`${N8N}/webhook/submit-posts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'update',
+        posts: [{
+          id,
+          client_id: clientId,
+          post_text: text,
+          category: category,
+          posting_time: new Date(timeVal).toISOString()
+        }]
+      })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    closeModal('editModal');
+    toast('✅ تم التعديل بنجاح', 'success');
+    await refreshData();
+  } catch (e) {
+    console.error('Edit error:', e);
+    toast('❌ خطأ في التعديل — يرجى المحاولة مرة أخرى', 'error');
+  } finally {
+    setLoading(btn, false, '💾 حفظ التعديل');
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   مودال الحذف
+═══════════════════════════════════════════════ */
+function openDelete(id) {
+  document.getElementById('deleteId').value = id;
+  openModal('deleteModal');
+}
+
+async function confirmDelete() {
+  const id = parseInt(document.getElementById('deleteId').value);
+  const btn = document.getElementById('confirmDeleteBtn');
+  setLoading(btn, true, '⏳ جاري الحذف...');
+
+  try {
+    const res = await fetch(`${N8N}/webhook/submit-posts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'delete',
+        posts: [{ id, client_id: clientId }]
+      })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    closeModal('deleteModal');
+    toast('✅ تم الحذف بنجاح', 'success');
+    await refreshData();
+  } catch (e) {
+    console.error('Delete error:', e);
+    toast('❌ خطأ في الحذف — يرجى المحاولة مرة أخرى', 'error');
+  } finally {
+    setLoading(btn, false, 'نعم، احذف');
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   التابات
+═══════════════════════════════════════════════ */
 function switchTab(name, btn) {
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
   btn.classList.add('on');
   document.getElementById('tab-add').style.display = name === 'add' ? 'block' : 'none';
   document.getElementById('tab-sched').style.display = name === 'sched' ? 'block' : 'none';
+  if (name === 'sched') refreshData(); // تحديث البيانات عند فتح تاب الجداول
 }
 
-// ── منطق CRUD المحدث للربط مع الوورك فلو الجديد ──
+/* ═══════════════════════════════════════════════
+   دوال مساعدة للمودال، التوست، وغيرها
+═══════════════════════════════════════════════ */
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function handleOverlayClick(e, id) { if (e.target === e.currentTarget) closeModal(id); }
 
-async function editPost(id) {
-  const post = sched.find(p => p.id == id);
-  const newText = prompt("تعديل نص المنشور:", post.post_text);
-  if (newText === null || newText.trim() === post.post_text) return;
-
-  try {
-    const res = await fetch(`${N8N}/webhook/submit-posts`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        action: 'update',
-        posts: [{ 
-            id: id, 
-            client_id: clientId, 
-            post_text: newText.trim(),
-            category: post.number_of_the_psot,
-            posting_time: post.posting_time 
-        }]
-      })
-    });
-    if(res.ok) { toast('✅ تم التعديل بنجاح'); location.reload(); }
-  } catch(e) { toast('❌ خطأ في التعديل'); }
+function clearErr(el, errId) {
+  el.classList.remove('err');
+  const errEl = document.getElementById(errId);
+  if (errEl) errEl.style.display = 'none';
 }
 
-async function deletePost(id) {
-  if (!confirm('هل أنت متأكد من حذف هذا المنشور نهائياً؟')) return;
-  try {
-    const res = await fetch(`${N8N}/webhook/submit-posts`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        action: 'delete',
-        posts: [{ id: id, client_id: clientId }]
-      })
-    });
-    if(res.ok) { toast('✅ تم الحذف بنجاح'); location.reload(); }
-  } catch(e) { toast('❌ خطأ في الحذف'); }
+function setLoading(btn, loading, text) {
+  btn.disabled = loading;
+  btn.textContent = text;
 }
 
-async function submitPosts() {
-  const d = document.getElementById('startDate').value;
-  const t = document.getElementById('postTime').value;
-  const f = parseInt(document.getElementById('freq').value);
-  if(!d || !t) { toast('⚠️ حدد وقت وتاريخ البداية'); return; }
-
-  const payload = posts.map((p, i) => {
-    const dt = new Date(`${d}T${t}:00`);
-    dt.setDate(dt.getDate() + i * f);
-    return { 
-      client_id: clientId, 
-      workflow_id: client.workflow_id, 
-      post_text: p.text, 
-      platform: p.platform, 
-      category: p.category, 
-      posting_time: dt.toISOString() 
-    };
-  });
-
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...';
-
-  try {
-    const res = await fetch(`${N8N}/webhook/submit-posts`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ 
-          action: 'create', 
-          posts: payload 
-      })
-    });
-    if(res.ok) { toast('✅ تم حفظ المنشورات بنجاح'); location.reload(); }
-  } catch(e) { toast('❌ خطأ في الإرسال'); btn.disabled = false; btn.textContent = 'إرسال للجدولة الآن'; }
+let _toastTimer = null;
+function toast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  clearTimeout(_toastTimer);
+  t.textContent = msg;
+  t.className = `show t-${type}`;
+  _toastTimer = setTimeout(() => { t.className = ''; }, 3800);
 }
 
-function toast(m){
-    const t=document.getElementById('toast');
-    if(!t) return;
-    t.textContent=m; t.classList.add('on');
-    setTimeout(()=>t.classList.remove('on'),3000);
+// دوال الأمان ضد XSS
+function escHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function escAttr(str) { return escHtml(str); }
+function escJs(str) {
+  return String(str ?? '')
+    .replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n').replace(/\r/g, '');
 }
 
-function updatePreview() {} 
+// بدء التطبيق
 init();
 </script>
 </body>
