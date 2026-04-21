@@ -322,6 +322,9 @@ let postCnt = 0;
 let currentSlide = 0;
 let categories = [];
 
+// *** الإضافة الوحيدة: Map لتخزين بيانات المنشورات بالـ ID ***
+let schedMap = {};
+
 /* ═══════════════════════════════════════════════
    التهيئة والتحميل
 ═══════════════════════════════════════════════ */
@@ -693,11 +696,14 @@ function updateCarouselView() {
     return;
   }
 
+  // *** الإصلاح: تخزين بيانات المنشورات في schedMap بدل تمريرها في onclick ***
+  schedMap = {};
+  filtered.forEach(p => { schedMap[p.id] = p; });
+
   const rows = filtered.map(p => {
     const dt = p.posting_time ? new Date(p.posting_time) : null;
     const info = getStatusInfo(p);
     const canEdit = !isPublished(p.status);
-    const postingIso = p.posting_time || '';
 
     return `
       <tr class="${info.rowCls}">
@@ -716,13 +722,8 @@ function updateCarouselView() {
         <td>
           <div class="action-btns">
             ${canEdit ? `
-              <button class="btn-sm btn-edit"
-                onclick="openEdit(${p.id},'${escJs(p.post_text)}','${postingIso}','${escJs(p.number_of_the_psot || '')}')">
-                تعديل
-              </button>
-              <button class="btn-sm btn-delete" onclick="openDelete(${p.id})">
-                حذف
-              </button>
+              <button class="btn-sm btn-edit" onclick="openEdit(${p.id})">تعديل</button>
+              <button class="btn-sm btn-delete" onclick="openDelete(${p.id})">حذف</button>
             ` : '<span style="font-size:11px;color:var(--g400)">—</span>'}
           </div>
         </td>
@@ -753,17 +754,22 @@ function nextSlide() { if (currentSlide < categories.length - 1) { currentSlide+
 /* ═══════════════════════════════════════════════
    مودال التعديل
 ═══════════════════════════════════════════════ */
-function openEdit(id, text, postingIso, category) {
+
+// *** الإصلاح: openEdit بتاخد ID بس وتجيب البيانات من schedMap ***
+function openEdit(id) {
+  const p = schedMap[id];
+  if (!p) return;
+
   document.getElementById('editId').value = id;
-  document.getElementById('editCategory').value = category;
-  document.getElementById('editText').value = text;
+  document.getElementById('editCategory').value = p.number_of_the_psot || '';
+  document.getElementById('editText').value = p.post_text || '';
   document.getElementById('editText').classList.remove('err');
   document.getElementById('errEditText').style.display = 'none';
   document.getElementById('errEditTime').style.display = 'none';
 
   // تحويل ISO → datetime-local
-  if (postingIso) {
-    const dtObj = new Date(postingIso);
+  if (p.posting_time) {
+    const dtObj = new Date(p.posting_time);
     const local = new Date(dtObj.getTime() - dtObj.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
     document.getElementById('editTime').value = local;
   } else {
