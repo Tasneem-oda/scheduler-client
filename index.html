@@ -389,7 +389,7 @@
 <script>
   const N8N = 'https://tasneemahmed-n8n-test.hf.space';
   const params = new URLSearchParams(location.search);
-let clientId = params.get('id') || sessionStorage.getItem('n8n_client_id');
+let clientId = params.get('id') || localStorage.getItem('n8n_client_id');
 
 let client = null;
 let sched = [];
@@ -399,9 +399,9 @@ let currentSlide = 0;
 let categories = [];
 let schedMap = {};
 
-function getSession(key){ return sessionStorage.getItem(key); }
-function setSession(key, val){ sessionStorage.setItem(key, val); }
-function clearSession(key){ sessionStorage.removeItem(key); }
+function getSession(key){ return localStorage.getItem(key); }
+function setSession(key, val){ localStorage.setItem(key, val); }
+function clearSession(key){ localStorage.removeItem(key); }
 
 /* ——— Auth ——— */
 function checkAuthStatus(){
