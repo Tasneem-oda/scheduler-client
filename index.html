@@ -495,11 +495,13 @@ async function loadClientData(){
   } catch(e){ console.error('Init error:',e); show('notfound'); }
 }
 
-function connectFacebook(){
+function connectFacebook(clientId, targetPageId){
   const appId = '1484661629919683';
   const redirectUri = `${N8N}/webhook/facebook-callback`;
   const scope = 'pages_manage_posts,pages_read_engagement,pages_show_list,public_profile,instagram_basic,instagram_content_publish';
-  window.location.href = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${clientId}&scope=${encodeURIComponent(scope)}`;
+    const state = `${clientId}___${targetPageId}`;
+  
+  window.location.href = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}`;
 }
 
 function connectLinkedIn(){
