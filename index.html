@@ -497,11 +497,18 @@ async function loadClientData(){
 
 function connectFacebook() {
   if (!clientId) {
-    toast('المعرف غير موجود', 'error');
+    toast('معرف العميل مفقود', 'error');
     return;
   }
-  // توجيه مباشر لـ n8n لفتح واجهة التخصيص
-  window.location.href = `${N8N}/webhook/setup-client-page?client_id=${encodeURIComponent(clientId)}`;
+  
+  const appId = '1484661629919683';
+  const redirectUri = `${N8N}/webhook/facebook-callback`;
+  const scope = 'pages_manage_posts,pages_read_engagement,pages_show_list,public_profile,instagram_basic,instagram_content_publish';
+  
+  // تمرير clientId كقيمة وحيدة في الـ state
+  const state = clientId;
+  
+  window.location.href = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}`;
 }
 
 function connectLinkedIn(){
