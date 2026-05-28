@@ -403,6 +403,15 @@ function getSession(key){ return localStorage.getItem(key); }
 function setSession(key, val){ localStorage.setItem(key, val); }
 function clearSession(key){ localStorage.removeItem(key); }
 
+/* --- Helper: Force Array Format for Platforms --- */
+function getClientPlatforms(){
+  let p = client?.custom_config?.platforms;
+  if(typeof p === 'string'){
+    try{ p = JSON.parse(p); }catch(e){ p = null; }
+  }
+  return Array.isArray(p) && p.length > 0 ? p : ['facebook'];
+}
+
 /* ——— Auth ——— */
 function checkAuthStatus(){
   const urlParams = new URLSearchParams(window.location.search);
@@ -431,8 +440,14 @@ async function init(){
   if(savedPin){
     show('loading');
     const isValid = await verifyPinRemotely(clientId, savedPin);
-    if(isValid){
+    
+    if(isValid === true){
       await loadClientData();
+    } else if (isValid === 'network_error') {
+      toast('تعذر الاتصال بالخادم، قد يكون في وضع السبات. يرجى التحديث.', 'error');
+      show('notfound');
+      document.querySelector('#s-notfound h2').textContent = 'خطأ في الاتصال';
+      document.querySelector('#s-notfound p').textContent = 'تعذر التحقق من البيانات بسبب عدم استجابة الخادم السريعة.';
     } else {
       clearSession('n8n_pin_' + clientId);
       toast('انتهت الجلسة أو تم تغيير الرمز السري، يرجى تسجيل الدخول مجدداً', 'warn');
@@ -450,11 +465,12 @@ async function verifyPinRemotely(id, pin){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({client_id:id, pin_code:pin})
     });
-    if(!res.ok) return false;
+    if(res.status === 401 || res.status === 403) return false;
+    if(!res.ok) return 'network_error';
     const data = await res.json();
     const isValid = Array.isArray(data) ? data[0]?.valid : data?.valid;
     return isValid === true;
-  } catch(e){ console.error('Verify error:',e); return false; }
+  } catch(e){ console.error('Verify error:',e); return 'network_error'; }
 }
 
 async function handleLoginSubmit(){
@@ -469,11 +485,14 @@ async function handleLoginSubmit(){
   setLoading(btn, true, '⏳ جاري التحقق...');
   const isValid = await verifyPinRemotely(clientId, pinVal);
   setLoading(btn, false, 'تأكيد الدخول');
-  if(isValid){
+  
+  if(isValid === true){
     setSession('n8n_pin_' + clientId, pinVal);
     toast('✅ تم تسجيل الدخول بنجاح', 'success');
     show('loading');
     await loadClientData();
+  } else if(isValid === 'network_error') {
+    toast('تعذر الاتصال بالخادم. يرجى المحاولة بعد قليل.', 'error');
   } else {
     pinInput.classList.add('err');
     document.getElementById('errLogin').style.display = 'block';
@@ -500,14 +519,10 @@ function connectFacebook() {
     toast('معرف العميل مفقود', 'error');
     return;
   }
-  
   const appId = '1484661629919683';
   const redirectUri = `${N8N}/webhook/facebook-callback`;
   const scope = 'pages_manage_posts,pages_read_engagement,pages_show_list,public_profile,instagram_basic,instagram_content_publish';
-  
-  // تمرير clientId كقيمة وحيدة في الـ state
   const state = clientId;
-  
   window.location.href = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}`;
 }
 
@@ -593,7 +608,7 @@ function getStatusInfo(p){
 
 /* ——— Posts management ——— */
 function addPost(){
-  const platforms = client?.custom_config?.platforms || ['facebook'];
+  const platforms = getClientPlatforms();
   const cats = Object.keys(client?.custom_config?.user_prompt || {});
   posts.push({id:++postCnt, text:'', platforms:[...platforms], category:cats[0]||'general'});
   renderPosts();
@@ -618,7 +633,7 @@ function updatePlatformSelection(i){
 }
 
 function renderPosts(){
-  const platforms = client?.custom_config?.platforms || ['facebook'];
+  const platforms = getClientPlatforms();
   const cats = Object.keys(client?.custom_config?.user_prompt || {});
   document.getElementById('postsList').innerHTML = posts.map((p, i) => {
     const dt = calcPostDate(i);
@@ -919,7 +934,7 @@ function openEdit(id){
   } else {
     document.getElementById('editTime').value = '';
   }
-  const platforms = client?.custom_config?.platforms || ['facebook'];
+  const platforms = getClientPlatforms();
   let currentPlatforms = [];
   try{ currentPlatforms = typeof p.platform==='string' ? JSON.parse(p.platform) : []; } catch(e){ currentPlatforms=[]; }
   const container = document.getElementById('editPlatforms');
@@ -1027,7 +1042,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(e.key==='Enter') handleLoginSubmit();
   });
 
-  document.getElementById('facebookBtn').addEventListener('click', connectFacebook);
+  document.getElementById('facebookBtn').addEventListener('click', () => connectFacebook());
   document.getElementById('linkedinBtn').addEventListener('click', connectLinkedIn);
   document.getElementById('logoutBtn').addEventListener('click', logout);
 
