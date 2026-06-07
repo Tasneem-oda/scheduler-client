@@ -526,11 +526,12 @@ function connectFacebook() {
   window.location.href = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}`;
 }
 
-function connectLinkedIn(){
+function connectLinkedIn() {
   const clientId_LI = '774z4bd71u95xa';
-  const redirectUri = `${N8N}/webhook/linkedin-callback`;
-  const scope = 'w_member_social openid profile ';
-  window.location.href = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId_LI}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${clientId}&scope=${encodeURIComponent(scope)}`;
+    const cleanN8N = N8N.replace(/\/$/, '');
+  const redirectUri = `${cleanN8N}/webhook/linkedin-callback`;
+    const scope = 'w_member_social openid profile';
+    window.location.href = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId_LI}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${clientId}&scope=${encodeURIComponent(scope)}`;
 }
 
 function logout(){
