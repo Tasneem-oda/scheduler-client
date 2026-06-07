@@ -520,7 +520,7 @@ function connectFacebook() {
     return;
   }
   const appId = '1484661629919683';
-  const redirectUri = `${N8N}/webhook/facebook-callback`;
+  const redirectUri = `${N8N.replace(/\/$/, '')}/webhook/facebook-callback`;
   const scope = 'pages_manage_posts,pages_read_engagement,pages_show_list,public_profile,instagram_basic,instagram_content_publish';
   const state = clientId;
   window.location.href = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}`;
