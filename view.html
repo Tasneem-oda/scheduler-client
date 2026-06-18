@@ -24,8 +24,11 @@
     --brand-light: rgba(55, 48, 163, 0.15);
     --brand-accent-dark: rgb(129, 140, 248);
     
+    /* Utility Colors */
     --whatsapp:#25D366;
     --whatsapp-dark:#1DA851;
+    --chart-green: #4ade80; /* درجة أخضر ساطعة للخلفيات الداكنة */
+    
     --line:#DBD4C0;
     --line-on-ink: rgba(244,242,235,0.14);
     --radius-lg:22px;
@@ -62,7 +65,7 @@
     max-width: 100%;
     width: 100% !important;
     border-radius: var(--radius-sm);
-    background: white; /* إجبار خلفية بيضاء لتجنب اختفاء النص الداكن للمنشور إذا كانت الحاوية داكنة */
+    background: white; 
   }
 
   .wrap{
@@ -201,14 +204,51 @@
   .timeline{
     display:flex;
     align-items:flex-end;
-    gap:10px;
-    margin-top:34px;
+    gap:4px;
+    height:70px;
+    margin-top:45px;
     padding-bottom:6px;
     border-bottom:1px solid var(--line-on-ink);
   }
-  .tl-bar{ border-radius:6px 6px 0 0; background:var(--brand-accent-dark); }
-  .tl-bar.gap{ background:transparent; border:1px dashed var(--line-on-ink); }
-  .tl-cap{ display:flex; justify-content:space-between; font-size:12px; color:var(--on-ink-soft); margin-top:8px;}
+  .tl-bar{
+    border-radius:4px 4px 0 0;
+    background:var(--chart-green); /* تحديث اللون للأخضر */
+    position:relative;
+  }
+  .tl-gap{
+    background:rgba(244,242,235,0.1);
+    height:4px !important;
+    border-radius:2px;
+    position:relative;
+  }
+  /* Labels */
+  .tl-label-active::after {
+    content: 'نشر';
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--chart-green); /* تحديث لون النص للأخضر */
+  }
+  .tl-label-gap::after {
+    content: 'سكوت تام';
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: var(--on-ink-soft);
+    white-space: nowrap;
+  }
+  .tl-cap{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    color:var(--on-ink-soft);
+    margin-top:8px;
+  }
 
   /* ===== Steps ===== */
   .steps{ display:flex; flex-direction:column; gap:18px; margin-top:10px; }
@@ -358,7 +398,6 @@
 <body>
 
 <main>
-  <!-- ===================== HERO ===================== -->
   <section class="hero">
     <div class="wrap hero-grid">
       <div class="reveal">
@@ -396,7 +435,6 @@
     </div>
   </section>
 
-  <!-- ===================== PROBLEM ===================== -->
   <section class="band-ink">
     <div class="wrap reveal">
       <span class="eyebrow">المشكلة</span>
@@ -404,18 +442,22 @@
       <p>انت عندك خبرة وعندك حاجات تتقال للناس، بس اليوم بيخلص وانت لسه ماكتبتش بوست. وبعد فترة بتلاقي فيه فترات سكوت طويلة على الصفحة، وده بيأثر على ثقة المتابعين وعلى انتشار المحتوى. المشكلة إن كتابة بوست كويس وتصميم صورة وجدولة النشر بياخد وقت أكتر من اللي الناس فاكراه.</p>
 
       <div class="timeline" aria-hidden="true">
-        <div class="tl-bar" style="height:34px; width:13%;"></div>
-        <div class="tl-bar gap" style="height:34px; width:22%;"></div>
-        <div class="tl-bar" style="height:34px; width:10%;"></div>
-        <div class="tl-bar gap" style="height:34px; width:30%;"></div>
-        <div class="tl-bar" style="height:34px; width:13%;"></div>
-        <div class="tl-bar gap" style="height:34px; width:12%;"></div>
+        <div class="tl-bar tl-label-active" style="height:100%; width:10%;"></div>
+        <div class="tl-bar" style="height:70%; width:10%;"></div>
+        
+        <div class="tl-gap tl-label-gap" style="width:30%;"></div>
+        
+        <div class="tl-bar tl-label-active" style="height:50%; width:10%;"></div>
+        
+        <div class="tl-gap tl-label-gap" style="width:40%;"></div>
       </div>
-      <div class="tl-cap"><span>بداية الشهر</span><span>نهاية الشهر</span></div>
+      <div class="tl-cap">
+        <span>بداية الشهر (حماس)</span>
+        <span>نهاية الشهر (اختفاء)</span>
+      </div>
     </div>
   </section>
 
-  <!-- ===================== STEPS ===================== -->
   <section>
     <div class="wrap reveal">
       <span class="eyebrow">إزاي تعمل الأداة</span>
@@ -449,7 +491,6 @@
     </div>
   </section>
 
-  <!-- ===================== EXAMPLES ===================== -->
   <section class="band-ink">
     <div class="wrap reveal">
       <span class="eyebrow">أمثلة</span>
@@ -483,7 +524,6 @@
     </div>
   </section>
 
-  <!-- ===================== BENEFITS ===================== -->
   <section style="background:var(--paper-soft);">
     <div class="wrap reveal">
       <span class="eyebrow">الفوائد</span>
@@ -514,7 +554,6 @@
     </div>
   </section>
 
-  <!-- ===================== FAQ ===================== -->
   <section>
     <div class="wrap reveal">
       <span class="eyebrow">أسئلة شائعة</span>
@@ -549,7 +588,6 @@
     </div>
   </section>
 
-  <!-- ===================== TRIAL ===================== -->
   <section class="band-ink">
     <div class="wrap reveal">
       <span class="eyebrow">التجربة المجانية</span>
@@ -571,7 +609,6 @@
     </div>
   </section>
 
-  <!-- ===================== FINAL CTA ===================== -->
   <section class="cta-final">
     <div class="wrap reveal">
       <span class="eyebrow" style="justify-content:center;">جاهز تبدأ؟</span>
@@ -585,7 +622,6 @@
   </section>
 </main>
 
-<!-- floating whatsapp button -->
 <a class="float-wa" href="https://wa.me/201037728764?text=أهلاً، عايز أعرف أكتر عن أداة المحتوى وأبدأ التجربة المجانية" data-wa-link aria-label="اتكلم معانا على واتساب">
   <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true" focusable="false"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.07-1.32A9.94 9.94 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm5.2 14.2c-.22.62-1.3 1.18-1.78 1.25-.46.07-1.03.1-1.66-.1-.38-.12-.87-.28-1.5-.55-2.64-1.14-4.36-3.8-4.5-3.99-.13-.18-1.08-1.44-1.08-2.74 0-1.3.68-1.94.92-2.2.24-.27.53-.33.7-.33.18 0 .35 0 .5.01.16.01.38-.06.6.46.22.53.75 1.83.82 1.96.07.13.11.29.02.46-.09.18-.14.29-.27.45-.13.16-.27.36-.39.48-.13.13-.26.27-.11.53.15.27.68 1.12 1.46 1.81 1 .88 1.85 1.16 2.12 1.29.27.13.43.11.59-.07.16-.18.69-.8.87-1.07.18-.27.36-.22.6-.13.24.09 1.53.72 1.79.85.27.13.45.2.51.31.07.11.07.62-.15 1.24z"/></svg>
 </a>
