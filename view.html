@@ -62,6 +62,7 @@
     max-width: 100%;
     width: 100% !important;
     border-radius: var(--radius-sm);
+    background: white; /* إجبار خلفية بيضاء لتجنب اختفاء النص الداكن للمنشور إذا كانت الحاوية داكنة */
   }
 
   .wrap{
@@ -378,12 +379,17 @@
         <div class="demo">
           <div class="demo-card">
             <span class="tag">قبل — فكرتك</span>
-            <div>ليه التفكير الذائد مسيطر علي حياتك</div>
+            <div class="raw-line"></div>
+            <div class="raw-line"></div>
+            <div class="raw-line s"></div>
           </div>
           <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <div class="demo-card" style="padding:0; overflow:hidden;">
-            <span class="tag" style="padding:18px 18px 0;">بعد — بوست جاهز</span>
-            <iframe src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fpermalink.php%3Fstory_fbid%3Dpfbid0278PgPxHnZnwyTtMQNpJMjAgoc9Rt1usxxZ6uebDfE3jgi4wHoLRgTrs7ZWiKdwGal%26id%3D61590287194065&show_text=true" height="300" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+          <div class="demo-card">
+            <span class="tag">بعد — بوست جاهز</span>
+            <div class="post-head"><div class="post-avatar"></div><div class="post-name"></div></div>
+            <div class="post-img"></div>
+            <div class="post-line w70"></div>
+            <div class="post-line"></div>
           </div>
         </div>
       </div>
@@ -396,6 +402,16 @@
       <span class="eyebrow">المشكلة</span>
       <h2>المشكلة مش في الخبرة، <mark class="hl">المشكلة في الوقت</mark></h2>
       <p>انت عندك خبرة وعندك حاجات تتقال للناس، بس اليوم بيخلص وانت لسه ماكتبتش بوست. وبعد فترة بتلاقي فيه فترات سكوت طويلة على الصفحة، وده بيأثر على ثقة المتابعين وعلى انتشار المحتوى. المشكلة إن كتابة بوست كويس وتصميم صورة وجدولة النشر بياخد وقت أكتر من اللي الناس فاكراه.</p>
+
+      <div class="timeline" aria-hidden="true">
+        <div class="tl-bar" style="height:34px; width:13%;"></div>
+        <div class="tl-bar gap" style="height:34px; width:22%;"></div>
+        <div class="tl-bar" style="height:34px; width:10%;"></div>
+        <div class="tl-bar gap" style="height:34px; width:30%;"></div>
+        <div class="tl-bar" style="height:34px; width:13%;"></div>
+        <div class="tl-bar gap" style="height:34px; width:12%;"></div>
+      </div>
+      <div class="tl-cap"><span>بداية الشهر</span><span>نهاية الشهر</span></div>
     </div>
   </section>
 
@@ -447,7 +463,7 @@
             <div class="ex-before">"عايز أتكلم عن أهمية الحدود الشخصية في العلاقات"</div>
             <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <div class="ex-after" style="padding:0; overflow:hidden;">
-              <iframe src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fpermalink.php%3Fstory_fbid%3Dpfbid0NPKdJAAejizRVJZyK9zJwRJSjCXcZp86t5mc29UVEYpSVwKk6HzB9AQUvcM5KdUXl%26id%3D61590287194065&show_text=true" height="660" style="border:none;overflow:hidden;color:white" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+              <iframe src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fpermalink.php%3Fstory_fbid%3Dpfbid0NPKdJAAejizRVJZyK9zJwRJSjCXcZp86t5mc29UVEYpSVwKk6HzB9AQUvcM5KdUXl%26id%3D61590287194065&show_text=true" height="660" style="border:none;overflow:hidden;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
             </div>
           </div>
         </div>
@@ -458,7 +474,7 @@
             <div class="ex-before">بوست تسويقي لاداة الذكاء الاصطناعي خاصتي</div>
             <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <div class="ex-after" style="padding:0; overflow:hidden;">
-              <iframe src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fpermalink.php%3Fstory_fbid%3Dpfbid09ZpVAPvzQ31VqpTLbXMFWvYyqgKrYezsS5RVUWf143UfLcJ8quQj86hFWvyfGyxTl%26id%3D61568990838039&show_text=true" height="701" style="border:none;overflow:hidden;color:white" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+              <iframe src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fpermalink.php%3Fstory_fbid%3Dpfbid09ZpVAPvzQ31VqpTLbXMFWvYyqgKrYezsS5RVUWf143UfLcJ8quQj86hFWvyfGyxTl%26id%3D61568990838039&show_text=true" height="701" style="border:none;overflow:hidden;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
             </div>
           </div>
         </div>
