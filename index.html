@@ -937,7 +937,16 @@ function openEdit(id){
   }
   const platforms = getClientPlatforms();
   let currentPlatforms = [];
-  try{ currentPlatforms = typeof p.platform==='string' ? JSON.parse(p.platform) : []; } catch(e){ currentPlatforms=[]; }
+  if (Array.isArray(p.platform)) {
+    currentPlatforms = p.platform;
+  } else if (typeof p.platform === 'string') {
+    try {
+      currentPlatforms = JSON.parse(p.platform);
+    } catch(e) {
+      // كحل احتياطي إذا كانت البيانات نصية مفصولة بفواصل أو بصيغة {facebook,linkedin}
+      currentPlatforms = p.platform.replace(/[{}]/g, '').split(',').map(s => s.trim().replace(/^"|"$/g, '')).filter(Boolean);
+    }
+  }
   const container = document.getElementById('editPlatforms');
   container.innerHTML = platforms.map(pl => `
     <label style="display:inline-flex;align-items:center;gap:3px;margin-left:12px;font-size:13px;">
